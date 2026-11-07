@@ -81,5 +81,12 @@ function Feed({ kind }) {
   </section>;
 }
 export default function PhysioDashboard() {
-  return <><h2>Physiotherapist dashboard</h2><PatientDetails /><AISummary /><PatientGraphs /><div className="columns"><div><AssignmentEditor /><Messages sender="provider" /></div><div><Feed kind="checkins" /><Feed kind="sessions" /></div></div></>;
+  return <main className="provider-dashboard">
+    <div className="provider-heading"><div><span className="provider-eyebrow">PATIENT OVERVIEW</span><h2>Physiotherapist dashboard</h2><p>Review activity, adjust exercises, and respond to your patient.</p></div><span className="provider-live">Live updates</span></div>
+    <div className="provider-overview"><PatientDetails /><AISummary /></div>
+    <h3 className="provider-section-title">Activity trends</h3>
+    <PatientGraphs />
+    <h3 className="provider-section-title">Plan and communication</h3>
+    <div className="columns"><div><AssignmentEditor /><Messages sender="provider" /></div><div><Feed kind="checkins" /><Feed kind="sessions" /></div></div>
+  </main>;
 }

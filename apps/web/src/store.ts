@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react'
 
-export type View = 'home' | 'checkin' | 'cidone' | 'plan' | 'detail' | 'session' | 'report' | 'calendar' | 'baby' | 'care' | 'assistant'
-export type Tab = 'home' | 'plan' | 'calendar' | 'care' | 'assistant'
+export type View = 'home' | 'checkin' | 'cidone' | 'plan' | 'detail' | 'session' | 'report' | 'calendar' | 'baby' | 'care'
+export type Tab = 'home' | 'plan' | 'calendar' | 'care'
 export type Exercise = {
   id: string
   name: string

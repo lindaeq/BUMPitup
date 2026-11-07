@@ -43,10 +43,7 @@ export default function Assistant() {
   }
 
   return <>
-    <div className="row" style={{ marginTop: 6 }}>
-      <div className="ico" style={{ borderRadius: '50%' }}>BB</div>
-      <div><b>BumpBridge Assistant</b><p className="sub">Pregnancy education · AI assistant</p></div>
-    </div>
+    <p className="sub" style={{ marginTop: 16 }}>Ask a question here. AI replies are separate from care team messages.</p>
     <div>
       {messages.map((item, index) => <div key={index} className={`msg ${item.who}`}>{item.text}<small>Now</small></div>)}
       {sending && <div className="msg them">Thinking…<small>Now</small></div>}

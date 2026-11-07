@@ -35,8 +35,8 @@ export default function PatientGraphs() {
             <XAxis dataKey="name" hide />
             <YAxis domain={[0, 10]} />
             <Tooltip /><Legend />
-            <Line type="monotone" dataKey="Pain" stroke="#d14f66" strokeWidth={2} />
-            <Line type="monotone" dataKey="Fatigue" stroke="#397da0" strokeWidth={2} />
+            <Line type="monotone" dataKey="Pain" stroke="#bd486b" strokeWidth={2} />
+            <Line type="monotone" dataKey="Fatigue" stroke="#8a7397" strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -49,8 +49,8 @@ export default function PatientGraphs() {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" /><YAxis domain={[40, 180]} />
             <Tooltip /><Legend />
-            <Bar dataKey="HR Before" fill="#52a870" />
-            <Bar dataKey="HR After" fill="#e9a34e" />
+            <Bar dataKey="HR Before" fill="#bb8f9f" />
+            <Bar dataKey="HR After" fill="#bd486b" />
           </BarChart>
         </ResponsiveContainer>
       </div>

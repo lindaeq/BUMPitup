@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useApp, type State } from '../store'
+import { useApp, type Exercise, type State } from '../store'
 import { BarChart, LineChart } from '../components/Charts'
 import Icon from '../components/Icon'
 import { CURRENT_WEEK, DUE, EVENTS, RECS, START, TODAY, WEEKLY_GOAL, WEEKS, addDays, dayIndex, iso, streak, weekOf, type Rec } from '../data'
@@ -13,6 +13,13 @@ const parse = (k: string) => {
   return new Date(y, m - 1, d)
 }
 const avg = (a: number[]) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0)
+const plannedFor = (date: Date, exercises: Exercise[]) => {
+  if (date < TODAY || !exercises.length) return []
+  if (date.getDay() === 1) return exercises.slice(0, 1)
+  if (date.getDay() === 3) return [exercises[1] ?? exercises[0]]
+  if (date.getDay() === 5) return exercises
+  return []
+}
 
 function todayRec(s: State): Rec {
   const done = s.ex.filter((e) => e.done)
@@ -51,11 +58,13 @@ export default function Calendar() {
       const r = by.get(k)
       const inPreg = dayIndex(date) >= 0 && date <= DUE
       const lv = r ? level(r.mins) : 0
+      const planned = plannedFor(date, s.ex)
       if (mini) out.push(<i key={k} className={`${inPreg ? `l${lv}` : 'off'}`} />)
       else
         out.push(
-          <button key={k} type="button" className={`cell l${lv} ${inPreg ? '' : 'off'} ${k === todayK ? 'today' : ''} ${sel === k ? 'sel' : ''}`} onClick={() => setSel(k)} aria-label={k}>
+          <button key={k} type="button" className={`cell l${lv} ${inPreg ? '' : 'off'} ${k === todayK ? 'today' : ''} ${sel === k ? 'sel' : ''}`} onClick={() => setSel(k)} aria-label={`${k}${planned.length ? `, ${planned.length} planned exercise${planned.length > 1 ? 's' : ''}` : ''}`}>
             {d}
+            {planned.length > 0 && <span className="plan-dot" />}
             {EVENTS[k] && <span className="ev" />}
             {r && r.pain != null && r.pain >= 7 && <span className="hp" />}
           </button>,
@@ -78,11 +87,21 @@ export default function Calendar() {
     const r = by.get(sel)
     const ev = EVENTS[sel]
     const preg = dayIndex(sd) >= 0 && sd <= DUE
+    const planned = plannedFor(sd, s.ex)
+    const upcoming = Array.from({ length: 8 }, (_, index) => addDays(TODAY, index)).filter(date => plannedFor(date, s.ex).length > 0).slice(0, 3)
     return (
       <>
         <h1 style={{ marginTop: 10 }}>Calendar</h1>
       <div className="alert">The charts below use illustrative sample history. Your actual Firestore sessions appear under Recent sessions.</div>
         {seg}
+        <div className="card sample-schedule">
+          <div className="row sp"><b>Sample exercise schedule</b><span className="pill">Mon · Wed · Fri</span></div>
+          <p className="sub">Example timing for your assigned exercises. Your physiotherapist has not set these dates.</p>
+          {upcoming.length ? upcoming.map(date => <button key={iso(date)} type="button" className="schedule-row" onClick={() => { setSel(iso(date)); setMi(date.getMonth() - 4 + (date.getFullYear() - 2026) * 12) }}>
+            <span>{date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+            <b>{plannedFor(date, s.ex).map(exercise => exercise.name).join(' · ')}</b>
+          </button>) : <p className="sub" style={{ marginTop: 12 }}>Your assigned exercises will appear here when your care team adds them.</p>}
+        </div>
         <div className="row sp" style={{ marginTop: 14 }}>
           <button type="button" className="ico" aria-label="Previous month" disabled={mi === 0} style={{ opacity: mi === 0 ? 0.35 : 1 }} onClick={() => setMi(mi - 1)}><Icon n="back" /></button>
           <b style={{ fontSize: 17 }}>{mname(m)}</b>
@@ -95,7 +114,7 @@ export default function Calendar() {
         <div className="legend">
           <span>Active minutes</span><i style={{ background: '#f6efeb' }} />0<i style={{ background: '#f9c9d8' }} />&lt;15<i style={{ background: '#ef7fa1' }} />&lt;25<i style={{ background: 'var(--rose)' }} />25+
         </div>
-        <div className="legend" style={{ marginTop: 4 }}><i style={{ background: 'var(--ink)', width: 6, height: 6, borderRadius: 3 }} />Appointment<i style={{ background: '#b42318', width: 6, height: 6, borderRadius: 3, marginLeft: 8 }} />Pain 7 or higher</div>
+        <div className="legend" style={{ marginTop: 4 }}><i style={{ background: 'var(--rose)', width: 6, height: 6, borderRadius: 3 }} />Planned exercise<i style={{ background: 'var(--ink)', width: 6, height: 6, borderRadius: 3, marginLeft: 8 }} />Appointment</div>
 
         <div className="card">
           <div className="row sp">
@@ -103,6 +122,7 @@ export default function Calendar() {
             {preg && <span className="pill">Week {weekOf(sd)}</span>}
           </div>
           {ev && <div className="alert" style={{ marginTop: 10, background: 'var(--blush)', color: 'var(--rosed)' }}><b>{ev}</b></div>}
+          {planned.length > 0 && <div className="scheduled-detail"><b>Planned exercises</b>{planned.map(exercise => <p key={exercise.id}>{exercise.name}</p>)}</div>}
           {r ? (
             <>
               <div className="row" style={{ marginTop: 10, flexWrap: 'wrap' }}>

@@ -11,7 +11,7 @@ export default function PatientDetails() {
   }, error => setMessage(firebaseError(error))), []);
   return <section className="card"><h3>Fictional patient</h3>
     {message && <p role="status">{message}</p>}
-    {patient && <p><strong>{patient.name}</strong> · Pregnancy week {patient.pregnancyWeek}</p>}
+    {patient && <p className="provider-patient-name"><strong>{patient.name}</strong><span>{patient.pregnancyWeek == null ? 'Pregnancy week not set' : `Pregnancy week ${patient.pregnancyWeek}`}</span></p>}
     <small>Patient ID: {PATIENT_ID}</small>
   </section>;
 }

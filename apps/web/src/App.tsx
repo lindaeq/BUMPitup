@@ -15,7 +15,6 @@ import Report from './screens/Report'
 import Calendar from './screens/Calendar'
 import Baby from './screens/Baby'
 import Care from './screens/Care'
-import Assistant from './screens/Assistant'
 
 const localIds: Record<string, string> = {
   'wide-stance-squat': 'sq', 'bird-dog': 'bd', 'wall-push-up': 'wp', 'seated-arm-raise': 'ar',
@@ -140,7 +139,7 @@ export default function App() {
   const screens = {
     home: <Home />, checkin: <CheckIn />, cidone: <CheckInDone />,
     plan: <Plan />, detail: <ExerciseDetail />, session: <Session key={s.arg} />,
-    report: <Report />, calendar: <Calendar />, baby: <Baby />, care: <Care />, assistant: <Assistant />,
+    report: <Report />, calendar: <Calendar />, baby: <Baby />, care: <Care />,
   }
   return <AppCtx.Provider value={ctx}><PhoneFrame>
     {(configError || s.error) && <div className="alert red" role="alert">{configError || s.error}</div>}
