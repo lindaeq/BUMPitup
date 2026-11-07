@@ -1,4 +1,4 @@
-# BumpBridge
+# BUMPitup
 
 Hackathon patient and physiotherapist demo in one React app. The patient screens come from the Linda frontend on `main`, the camera tracker from `cv`, and the Firebase assignment and communication flow from `Jenny`. Use fictional data only.
 
