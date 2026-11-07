@@ -17,6 +17,25 @@ export interface RepCounterSnapshot {
 }
 
 /**
+ * Something notable that happened on this frame:
+ * - "rep": a repetition was counted.
+ * - "partial": the joint clearly left the start position but came back without reaching the target.
+ * - "too-fast": the movement completed but was rejected by the timing checks.
+ */
+export type RepEvent = "rep" | "partial" | "too-fast";
+
+export interface RepUpdate extends RepCounterSnapshot {
+  event: RepEvent | null;
+}
+
+/**
+ * A partial attempt must move at least this far past the start threshold
+ * before it is reported, so resting jitter around the threshold is ignored.
+ */
+const MIN_PARTIAL_EXCURSION_DEG = 8;
+const MIN_PARTIAL_EXCURSION_FRACTION = 0.25;
+
+/**
  * Generic hysteresis state machine for joint-angle repetitions.
  *
  *   waiting --(enter start zone)--> start --(enter target zone)--> target
@@ -74,10 +93,12 @@ export class RepCounter {
    * Feed one frame. `angle` must already be smoothed and visibility-checked;
    * pass null when the joint is not reliably tracked.
    */
-  update(angle: number | null, timestampMs: number): RepCounterSnapshot {
+  update(angle: number | null, timestampMs: number): RepUpdate {
+    let event: RepEvent | null = null;
+
     if (angle === null || !Number.isFinite(angle)) {
       this.handleLoss(timestampMs);
-      return this.snapshot();
+      return { ...this.snapshot(), event };
     }
     this.lostSince = null;
 
@@ -101,6 +122,7 @@ export class RepCounter {
           // A partial excursion that came back without reaching the target is
           // discarded: restart the window from the current resting position.
           if (this.lastInStartAt !== null && this.repMovedOutOfStart()) {
+            if (this.partialExcursionIsMeaningful()) event = "partial";
             this.beginWindow(angle);
           }
           this.trackWindow(angle);
@@ -114,7 +136,7 @@ export class RepCounter {
       case "target":
         this.trackWindow(angle);
         if (inStart) {
-          this.completeRep(timestampMs);
+          event = this.completeRep(timestampMs) ? "rep" : "too-fast";
           this.phase = "start";
           this.beginWindow(angle);
           this.lastInStartAt = timestampMs;
@@ -122,7 +144,7 @@ export class RepCounter {
         break;
     }
 
-    return this.snapshot();
+    return { ...this.snapshot(), event };
   }
 
   /** True when the current window contains angles outside the start zone. */
@@ -131,20 +153,30 @@ export class RepCounter {
     return !this.inStartZone(extreme);
   }
 
+  /** True when the abandoned attempt moved far enough to look intentional. */
+  private partialExcursionIsMeaningful(): boolean {
+    const { lowThreshold, highThreshold, startPosition } = this.config;
+    const excursion = startPosition === "low" ? this.repMax - lowThreshold : highThreshold - this.repMin;
+    const minimum = Math.max(MIN_PARTIAL_EXCURSION_DEG, MIN_PARTIAL_EXCURSION_FRACTION * (highThreshold - lowThreshold));
+    return excursion >= minimum;
+  }
+
   private trackWindow(angle: number): void {
     this.repMin = Math.min(this.repMin, angle);
     this.repMax = Math.max(this.repMax, angle);
   }
 
-  private completeRep(timestampMs: number): void {
+  /** Returns true if the repetition was counted. */
+  private completeRep(timestampMs: number): boolean {
     const duration = this.lastInStartAt === null ? 0 : timestampMs - this.lastInStartAt;
     const sinceLast = this.lastRepAt === null ? Infinity : timestampMs - this.lastRepAt;
     if (duration < this.config.minRepDurationMs || sinceLast < this.config.minRepIntervalMs) {
-      return; // Too fast to be a genuine repetition; likely jitter.
+      return false; // Too fast to be a genuine repetition, or jitter.
     }
     this.reps += 1;
     this.repRanges.push(this.repMax - this.repMin);
     this.lastRepAt = timestampMs;
+    return true;
   }
 
   private handleLoss(timestampMs: number): void {

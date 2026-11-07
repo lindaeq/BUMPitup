@@ -53,6 +53,12 @@ export const exerciseConfigs = {
     highThreshold: 75,
     ...DEFAULT_TIMING,
     cameraHint: "Sit side-on to the camera with the tracked arm closest to it. Keep hip, shoulder and elbow in view.",
+    tips: {
+      "start-position": "Start with your arm relaxed down by your side.",
+      "more-range": "Try lifting your arm a little higher, toward shoulder height, if it feels comfortable.",
+      "finish-rep": "Lower your arm all the way back down to finish each rep.",
+      "too-fast": "Slow down a little. Lift and lower your arm in a smooth, controlled way.",
+    },
   },
 
   "wide-stance-squat": {
@@ -69,6 +75,12 @@ export const exerciseConfigs = {
     ...DEFAULT_TIMING,
     minRepDurationMs: 800,
     cameraHint: "Stand side-on to the camera with your full body, including ankles, in view.",
+    tips: {
+      "start-position": "Start by standing tall with your knees straight but not locked.",
+      "more-range": "Try bending your knees a little more, only as far as feels comfortable.",
+      "finish-rep": "Stand all the way back up to finish each rep.",
+      "too-fast": "Take it slower. Lower and rise in a steady, controlled way.",
+    },
   },
 
   "wall-push-up": {
@@ -84,6 +96,12 @@ export const exerciseConfigs = {
     highThreshold: 155,
     ...DEFAULT_TIMING,
     cameraHint: "Stand side-on to the camera with the tracked elbow and wrist visible.",
+    tips: {
+      "start-position": "Start with your arms straight and your hands on the wall.",
+      "more-range": "Try bending your elbows a little more to bring your chest closer to the wall, if comfortable.",
+      "finish-rep": "Push back until your arms are straight to finish each rep.",
+      "too-fast": "Take it slower. Move toward and away from the wall in a controlled way.",
+    },
   },
 
   "bird-dog": {
@@ -122,6 +140,10 @@ export const exerciseConfigs = {
     minVisibility: 0.3,
     smoothingAlpha: 0.35,
     cameraHint: "Kneel side-on to the camera on hands and knees. `side` selects the arm; the opposite leg is tracked.",
+    tips: {
+      "start-position": "Start on your hands and knees with your back flat.",
+      "hold-longer": "Try holding the position a little longer before returning, if comfortable.",
+    },
   },
 } as const satisfies Record<string, ExerciseConfig>;
 

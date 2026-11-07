@@ -49,10 +49,33 @@ export interface CVResult {
   sessionMaxAngle: number | null;
   /** Current state of the repetition state machine. */
   phase: RepPhase;
+  /**
+   * Movement tip to show the patient, or null. At most one new tip appears per
+   * tip interval (10 s by default) and each stays for a few seconds.
+   */
+  tip: MovementTip | null;
 
   // ---- Hold-based exercises only (bird-dog) ----
   hold?: HoldMeasurements;
 }
+
+export type TipKind =
+  | "tracking" // body not fully visible to the camera
+  | "start-position" // never reached the starting position
+  | "more-range" // attempted a rep but did not reach the target range
+  | "finish-rep" // reached the target but did not return to the start
+  | "too-fast" // rep rejected because it was too quick
+  | "hold-longer"; // hold ended before the minimum duration
+
+export interface MovementTip {
+  /** Increments with each new tip, so the UI can tell a new tip from the same one. */
+  id: number;
+  kind: TipKind;
+  message: string;
+}
+
+/** Per-exercise tip wording. Missing entries are never shown. */
+export type TipMessages = Partial<Record<Exclude<TipKind, "tracking">, string>>;
 
 export interface HoldMeasurements {
   /** True while the configured position is currently held. */
@@ -122,6 +145,7 @@ export interface RepExerciseConfig extends RepThresholds {
    */
   startPosition: "low" | "high";
   cameraHint: string;
+  tips: TipMessages;
 }
 
 export interface HoldExerciseConfig {
@@ -149,6 +173,7 @@ export interface HoldExerciseConfig {
   minVisibility: number;
   smoothingAlpha: number;
   cameraHint: string;
+  tips: TipMessages;
 }
 
 export type ExerciseConfig = RepExerciseConfig | HoldExerciseConfig;

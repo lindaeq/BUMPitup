@@ -28,6 +28,13 @@ export interface HoldSnapshot {
   completedHoldsMs: number[];
 }
 
+/** "hold": a hold was counted. "hold-short": a hold ended before minHoldMs. */
+export type HoldEvent = "hold" | "hold-short";
+
+export interface HoldUpdate extends HoldSnapshot {
+  event: HoldEvent | null;
+}
+
 /**
  * Hold detector for bird-dog style exercises.
  *
@@ -45,6 +52,7 @@ export class HoldDetector {
   private lostSince: number | null = null;
   private completed: number[] = [];
   private lastTimestamp = 0;
+  private frameEvent: HoldEvent | null = null;
 
   constructor(private readonly config: HoldDetectorConfig) {}
 
@@ -68,7 +76,13 @@ export class HoldDetector {
   }
 
   /** Pass `null` when the pose is not detected at all. */
-  update(frame: HoldFrame | null, timestampMs: number): HoldSnapshot {
+  update(frame: HoldFrame | null, timestampMs: number): HoldUpdate {
+    this.frameEvent = null;
+    const snap = this.step(frame, timestampMs);
+    return { ...snap, event: this.frameEvent };
+  }
+
+  private step(frame: HoldFrame | null, timestampMs: number): HoldSnapshot {
     this.lastTimestamp = timestampMs;
     const tracked =
       frame !== null &&
@@ -117,7 +131,12 @@ export class HoldDetector {
   private endHold(): void {
     if (this.holdStartedAt !== null && this.lastInPositionAt !== null) {
       const duration = this.lastInPositionAt - this.holdStartedAt;
-      if (duration >= this.config.minHoldMs) this.completed.push(duration);
+      if (duration >= this.config.minHoldMs) {
+        this.completed.push(duration);
+        this.frameEvent = "hold";
+      } else {
+        this.frameEvent = "hold-short";
+      }
     }
     this.holdStartedAt = null;
     this.lastInPositionAt = null;

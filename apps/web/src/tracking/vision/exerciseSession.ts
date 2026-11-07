@@ -2,6 +2,7 @@ import { AngleSmoother, measureJoint } from "./angle";
 import { getExerciseConfig, withOverrides } from "./exerciseConfigs";
 import { HoldDetector } from "./holdDetector";
 import { RepCounter } from "./repCounter";
+import { TipCoach, type CoachEvent, type TipCoachOptions } from "./movementTips";
 import type {
   CVResult,
   ExerciseConfig,
@@ -26,6 +27,7 @@ export function emptyResult(hold = false): CVResult {
     sessionMinAngle: null,
     sessionMaxAngle: null,
     phase: "waiting",
+    tip: null,
     ...(hold
       ? { hold: { holding: false, currentHoldSeconds: 0, completedHoldSeconds: [], armAngle: null, legAngle: null } }
       : {}),
@@ -37,13 +39,24 @@ export function emptyResult(hold = false): CVResult {
  * The React component owns the camera and MediaPipe; this class owns the maths,
  * which keeps it unit-testable with synthetic landmarks.
  */
+interface FrameOutput {
+  result: CVResult;
+  event: CoachEvent | null;
+}
+
 export class ExerciseSession {
   readonly config: ExerciseConfig;
   /** Landmark triples to highlight on the preview. */
   readonly highlightedJoints: JointTriple[];
   private readonly impl: RepSessionImpl | HoldSessionImpl;
+  private readonly coach: TipCoach;
 
-  constructor(exerciseId: string, side: Side = "left", overrides?: Partial<RepThresholds>) {
+  constructor(
+    exerciseId: string,
+    side: Side = "left",
+    overrides?: Partial<RepThresholds>,
+    tipOptions?: Partial<TipCoachOptions>,
+  ) {
     const base = getExerciseConfig(exerciseId);
     if (!base) throw new Error(`Unknown exerciseId "${exerciseId}"`);
 
@@ -59,6 +72,7 @@ export class ExerciseSession {
       const arm = base.arm[side];
       this.highlightedJoints = [arm.shoulderFlexion, arm.elbow, leg.hipExtension, leg.knee];
     }
+    this.coach = new TipCoach(this.config.tips, this.config.cameraHint, tipOptions);
   }
 
   /**
@@ -66,11 +80,19 @@ export class ExerciseSession {
    * @param landmarks the first detected pose, or null if no person was detected.
    */
   process(landmarks: readonly PoseLandmark[] | null, width: number, height: number, timestampMs: number): CVResult {
-    return this.impl.process(landmarks, width, height, timestampMs);
+    const { result, event } = this.impl.process(landmarks, width, height, timestampMs);
+    result.tip = this.coach.update({ quality: result.trackingQuality, phase: result.phase, event }, timestampMs);
+    return result;
+  }
+
+  /** Hide the current tip (e.g. when the camera stops) without resetting counts. */
+  clearTip(): void {
+    this.coach.clear();
   }
 
   reset(): void {
     this.impl.reset();
+    this.coach.reset();
   }
 }
 
@@ -86,7 +108,7 @@ class RepSessionImpl {
     this.counter = new RepCounter(config);
   }
 
-  process(landmarks: readonly PoseLandmark[] | null, width: number, height: number, t: number): CVResult {
+  process(landmarks: readonly PoseLandmark[] | null, width: number, height: number, t: number): FrameOutput {
     let quality: TrackingQuality = "unavailable";
     let raw: number | null = null;
 
@@ -99,7 +121,7 @@ class RepSessionImpl {
     const angle = this.smoother.next(raw);
     const snap = this.counter.update(angle, t);
 
-    return {
+    const result: CVResult = {
       reps: snap.reps,
       currentAngle: angle === null ? null : round1(angle),
       movementRange: snap.averageRange === null ? null : round1(snap.averageRange),
@@ -108,7 +130,9 @@ class RepSessionImpl {
       sessionMinAngle: snap.sessionMinAngle === null ? null : round1(snap.sessionMinAngle),
       sessionMaxAngle: snap.sessionMaxAngle === null ? null : round1(snap.sessionMaxAngle),
       phase: snap.phase,
+      tip: null,
     };
+    return { result, event: snap.event };
   }
 
   reset(): void {
@@ -137,7 +161,7 @@ class HoldSessionImpl {
     this.detector = new HoldDetector(config);
   }
 
-  process(landmarks: readonly PoseLandmark[] | null, width: number, height: number, t: number): CVResult {
+  process(landmarks: readonly PoseLandmark[] | null, width: number, height: number, t: number): FrameOutput {
     const arm = this.config.arm[this.side];
     const leg = this.config.leg[opposite(this.side)];
     const v = this.config.minVisibility;
@@ -172,7 +196,7 @@ class HoldSessionImpl {
       this.sessionMax = this.sessionMax === null ? smoothed.armElevation : Math.max(this.sessionMax, smoothed.armElevation);
     }
 
-    return {
+    const result: CVResult = {
       reps: snap.completedHoldsMs.length,
       currentAngle: smoothed.armElevation === null ? null : round1(smoothed.armElevation),
       movementRange: null,
@@ -181,6 +205,7 @@ class HoldSessionImpl {
       sessionMinAngle: this.sessionMin === null ? null : round1(this.sessionMin),
       sessionMaxAngle: this.sessionMax === null ? null : round1(this.sessionMax),
       phase: snap.phase,
+      tip: null,
       hold: {
         holding: snap.holding,
         currentHoldSeconds: round1(snap.currentHoldMs / 1000),
@@ -189,6 +214,7 @@ class HoldSessionImpl {
         legAngle: smoothed.hipExtension === null ? null : round1(smoothed.hipExtension),
       },
     };
+    return { result, event: snap.event };
   }
 
   reset(): void {

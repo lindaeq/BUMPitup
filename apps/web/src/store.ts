@@ -1,7 +1,8 @@
 import { createContext, useContext } from 'react'
+import { savedLanguage } from './lib/language'
 
-export type View = 'home' | 'checkin' | 'cidone' | 'plan' | 'detail' | 'session' | 'report' | 'calendar' | 'baby' | 'care'
-export type Tab = 'home' | 'plan' | 'calendar' | 'care'
+export type View = 'home' | 'checkin' | 'cidone' | 'plan' | 'detail' | 'session' | 'report' | 'calendar' | 'baby' | 'care' | 'you'
+export type Tab = 'home' | 'plan' | 'calendar' | 'care' | 'you'
 export type Exercise = {
   id: string
   name: string
@@ -39,6 +40,8 @@ export type State = {
   msgs: Msg[]
   sess: SessionResult | null
   toast: string | null
+  /** Preferred language code (BCP 47, e.g. 'es'). Saved only; the UI is not translated yet. */
+  language: string
 }
 
 export type Ctx = {
@@ -73,6 +76,7 @@ export const initialState: State = {
   unread: 0,
   sess: null,
   toast: null,
+  language: savedLanguage(),
   ex: [],
   hist: [],
   msgs: [],

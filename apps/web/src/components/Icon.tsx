@@ -14,6 +14,7 @@ const P = {
   pause: 'M8 5v14M16 5v14',
   bulb: 'M9 18h6M10 21h4M12 3a6 6 0 00-4 10.5V16h8v-2.5A6 6 0 0012 3z',
   bell: 'M6 17V11a6 6 0 0112 0v6l2 2H4zM10 21h4',
+  user: 'M12 12a4 4 0 100-8 4 4 0 000 8zM4 21a8 8 0 0116 0',
 }
 export type IconName = keyof typeof P
 

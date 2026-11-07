@@ -7,6 +7,7 @@ export type {
   CVResult,
   ExerciseTrackerProps,
   HoldMeasurements,
+  MovementTip,
   RepThresholds,
   Side,
   TrackingQuality,

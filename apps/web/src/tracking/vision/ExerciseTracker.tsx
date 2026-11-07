@@ -156,7 +156,8 @@ export function ExerciseTracker({
         last.result.reps !== result.reps ||
         last.result.trackingQuality !== result.trackingQuality ||
         last.result.phase !== result.phase ||
-        last.result.hold?.holding !== result.hold?.holding;
+        last.result.hold?.holding !== result.hold?.holding ||
+        last.result.tip?.id !== result.tip?.id;
       if (changed || now - last.at >= EMIT_INTERVAL_MS) {
         lastEmitRef.current = { at: now, result };
         setHud(result);
@@ -250,8 +251,9 @@ export function ExerciseTracker({
       canvasElement?.getContext("2d")?.clearRect(0, 0, canvasElement.width, canvasElement.height);
       // Report that tracking stopped, keeping the session's counts.
       const last = lastEmitRef.current?.result;
-      if (last && last.trackingQuality !== "unavailable") {
-        const stopped: CVResult = { ...last, currentAngle: null, trackingQuality: "unavailable" };
+      sessionRef.current?.clearTip();
+      if (last && (last.trackingQuality !== "unavailable" || last.tip)) {
+        const stopped: CVResult = { ...last, currentAngle: null, trackingQuality: "unavailable", tip: null };
         lastEmitRef.current = { at: performance.now(), result: stopped };
         setHud(stopped);
         onUpdateRef.current(stopped);
