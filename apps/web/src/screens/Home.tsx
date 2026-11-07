@@ -2,30 +2,32 @@ import { useState } from 'react'
 import { useApp } from '../store'
 import Icon from '../components/Icon'
 import Fruit from '../components/Fruit'
-import { CURRENT_WEEK, RECS, TIPS, TODAY_IDX, WEEKLY_GOAL, fruitFor, streak } from '../data'
+import { CURRENT_WEEK, TIPS, TODAY_IDX, WEEKLY_GOAL, fruitFor } from '../data'
+
+const WEEK_START = Date.now() - 7 * 86400000
 
 export default function Home() {
   const { s, go } = useApp()
   const [tipI, setTipI] = useState(TODAY_IDX % TIPS.length)
   const tip = TIPS[tipI]
   const n = s.ex.filter((e) => e.done).length
-  const mins = RECS.slice(-6).reduce((a, r) => a + r.mins, 0) + n * 9
-  const fruit = fruitFor(CURRENT_WEEK)
+  const mins = Math.floor(s.hist.filter(h => h.at >= WEEK_START).reduce((a, h) => a + h.t, 0) / 60)
+  const week = s.pregnancyWeek ?? CURRENT_WEEK
+  const fruit = fruitFor(week)
   return (
     <>
       <div className="row sp" style={{ marginTop: 6 }}>
         <div>
-          <p className="sub">Saturday, November 7</p>
-          <h1>Hello, Selina</h1>
+          <p className="sub">{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+          <h1>Hello, {s.patientName}</h1>
         </div>
         <button type="button" className="ico" aria-label="Care team messages" onClick={() => go('care', null, 'care')}>
           <Icon n="bell" />
         </button>
       </div>
       <div className="row" style={{ marginTop: 2 }}>
-        <span className="pill">Week {CURRENT_WEEK}</span>
-        <span className="pill">Second trimester</span>
-        <span className="pill ok">{streak()}-day streak</span>
+        <span className="pill">Week {s.pregnancyWeek ?? '—'}</span>
+        {s.pregnancyWeek != null && <span className="pill">{s.pregnancyWeek < 13 ? 'First' : s.pregnancyWeek < 28 ? 'Second' : 'Third'} trimester</span>}
       </div>
 
       {s.checked ? (
@@ -55,7 +57,7 @@ export default function Home() {
       </div>
 
 
-      <button type="button" className="card row" style={{ width: '100%', textAlign: 'left', padding: 12 }} onClick={() => go('baby', null, 'baby')}>
+      {s.pregnancyWeek != null && <button type="button" className="card row" style={{ width: '100%', textAlign: 'left', padding: 12 }} onClick={() => go('baby', null, 'baby')}>
         <div className="babyrow" style={{ flex: 1 }}>
           <Fruit type={fruit.type} size={56} />
           <div>
@@ -64,26 +66,27 @@ export default function Home() {
           </div>
         </div>
         <Icon n="chev" className="chev" />
-      </button>
+      </button>}
 
       <h2>This week</h2>
       <div className="card">
         <div className="row sp"><b>{mins} of {WEEKLY_GOAL} active minutes</b><span className={`pill ${mins >= WEEKLY_GOAL ? 'ok' : ''}`}>{mins >= WEEKLY_GOAL ? 'Goal met' : `${WEEKLY_GOAL - mins} to go`}</span></div>
         <div className="bar" style={{ marginTop: 10 }}><i style={{ width: `${Math.min(100, (mins / WEEKLY_GOAL) * 100)}%` }} /></div>
-        <p className="sub" style={{ marginTop: 8, fontSize: 12 }}>Goal set by Dr. Grey. See the Calendar tab for your full history.</p>
+        <p className="sub" style={{ marginTop: 8, fontSize: 12 }}>Demo weekly goal. Your recorded sessions appear in the exercise history.</p>
       </div>
 
       <h2>Today’s exercise plan</h2>
       <div className="card">
         <div className="row sp">
           <b>{n} of {s.ex.length} completed</b>
-          <span className={`pill ${n === s.ex.length ? 'ok' : ''}`}>{n === s.ex.length ? 'All done' : 'In progress'}</span>
+          <span className={`pill ${n === s.ex.length ? 'ok' : ''}`}>{s.ex.length === 0 ? 'No plan yet' : n === s.ex.length ? 'All done' : 'In progress'}</span>
         </div>
-        <div className="bar" style={{ margin: '10px 0 6px' }}><i style={{ width: `${(n / s.ex.length) * 100}%` }} /></div>
+        <div className="bar" style={{ margin: '10px 0 6px' }}><i style={{ width: `${s.ex.length ? (n / s.ex.length) * 100 : 0}%` }} /></div>
+        {s.ex.length === 0 && <p className="sub" style={{ marginTop: 8 }}>Your care team has not assigned an exercise yet.</p>}
         {s.ex.map((e) => (
           <button key={e.id} type="button" className="item" onClick={() => go('detail', e.id, 'plan')}>
-            <div className="ico"><Icon n={e.mode === 'cam' ? 'cam' : 'band'} /></div>
-            <div><b>{e.name}</b><small>{e.reps} reps · {e.sets} sets</small></div>
+            <div className="ico"><Icon n={e.mode === 'cam' ? 'cam' : 'ex'} /></div>
+            <div><b>{e.name}</b><small>{e.reps} reps · {e.targetDurationSeconds} sec target</small></div>
             {e.done ? <span className="pill ok" style={{ marginLeft: 'auto' }}>Done</span> : <Icon n="chev" className="chev" />}
           </button>
         ))}
@@ -91,8 +94,10 @@ export default function Home() {
 
       <h2>From your care team</h2>
       <button type="button" className="card" style={{ width: '100%', textAlign: 'left' }} onClick={() => go('care', null, 'care')}>
-        <div className="row sp"><b>Dr. Meredith Grey</b><small className="sub">Fri 09:05</small></div>
-        <p className="sub" style={{ marginTop: 6 }}>Let’s keep the arm raises gentle this week and move slowly through bird dog.</p>
+        {s.msgs.filter(message => message.w === 'them').length ? <>
+          <div className="row sp"><b>Care team message</b><small className="sub">{s.msgs.filter(message => message.w === 'them').at(-1)?.tm}</small></div>
+          <p className="sub" style={{ marginTop: 6 }}>{s.msgs.filter(message => message.w === 'them').at(-1)?.t}</p>
+        </> : <p className="sub">No feedback yet. Open Care team to send a question.</p>}
       </button>
       <div className="alert">Your plan is chosen by your care team. BumpBridge does not diagnose or decide whether activity is safe for you.</div>
     </>

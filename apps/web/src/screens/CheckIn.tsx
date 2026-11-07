@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { firebaseError } from '../lib/firebase'
 import { useApp } from '../store'
 import BackBar from '../components/BackBar'
 
@@ -6,13 +8,21 @@ const SYMS = ['Swelling in feet', 'Nausea', 'Trouble sleeping', 'Headache', 'Ble
 const URGENT = ['Bleeding', 'Fluid leaking', 'Less baby movement']
 
 export default function CheckIn() {
-  const { s, set } = useApp()
+  const { s, set, saveCheckin } = useApp()
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
   const c = s.ci
   const setCI = (p: Partial<typeof c>) => set((st) => ({ ci: { ...st.ci, ...p } }))
 
-  const submit = () => {
-    const urgent = c.pain >= 8 || c.sym.some((x) => URGENT.includes(x))
-    set({ checked: true, res: urgent ? 'urgent' : 'ok', view: 'cidone' })
+  const submit = async () => {
+    if (busy) return
+    setBusy(true); setError('')
+    try {
+      await saveCheckin()
+      const urgent = c.pain >= 8 || c.sym.some(x => URGENT.includes(x))
+      set({ checked: true, res: urgent ? 'urgent' : 'ok', view: 'cidone' })
+    } catch (failure) { setError(firebaseError(failure)) }
+    finally { setBusy(false) }
   }
 
   return (
@@ -59,10 +69,11 @@ export default function CheckIn() {
       ))}
 
       <h2>Notes</h2>
-      <textarea rows={3} placeholder="Anything else your care team should know?" value={c.notes} onChange={(e) => setCI({ notes: e.target.value })} />
+      <textarea rows={3} maxLength={1800} placeholder="Anything else your care team should know?" value={c.notes} onChange={(e) => setCI({ notes: e.target.value })} />
 
       <div className="alert red"><b>Seek help now</b> if you have bleeding, severe pain, fluid leaking, or notice less baby movement. Call your care team or emergency services.</div>
-      <button type="button" className="btn" onClick={submit}>Send to care team</button>
+      {error && <div className="alert red" role="alert">{error}</div>}
+      <button type="button" className="btn" disabled={busy} onClick={submit}>{busy ? 'Sending…' : 'Send to care team'}</button>
     </>
   )
 }

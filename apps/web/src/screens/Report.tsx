@@ -1,46 +1,41 @@
+import { useState } from 'react'
+import { firebaseError } from '../lib/firebase'
 import { fmt, useApp } from '../store'
 
 export default function Report() {
-  const { s, set, go, showToast } = useApp()
-  const e = s.ex.find((x) => x.id === s.sess?.exId)
-  const sess = s.sess
-  if (!e || !sess) return null
+  const { s, set, go, showToast, saveSession } = useApp()
+  const exercise = s.ex.find(item => item.id === s.sess?.exId)
+  const session = s.sess
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  if (!exercise || !session) return null
   const r = s.rp
-
-  const save = () => {
-    set((st) => ({
-      ex: st.ex.map((x) => (x.id === e.id ? { ...x, done: true } : x)),
-      hist: [{ n: e.name, d: 'Sat, Nov 7', r: sess.count, rom: sess.rom, p: r.pain, df: r.diff }, ...st.hist],
-      sess: null,
-    }))
-    go('plan', null, 'plan')
-    showToast('Session saved and sent to your care team')
+  const save = async () => {
+    if (busy) return
+    setBusy(true); setError('')
+    try {
+      await saveSession()
+      set({ sess: null })
+      go('plan', null, 'plan')
+      showToast('Session saved and sent to your care team')
+    } catch (failure) { setError(firebaseError(failure)) }
+    finally { setBusy(false) }
   }
-
-  return (
-    <>
-      <h1 style={{ marginTop: 10 }}>How did that feel?</h1>
-      <p className="sub">{e.name} · {sess.count} reps in {fmt(sess.t)}</p>
-      <div className="stats">
-        <div className="stat"><b>{sess.count}</b><small>Reps</small></div>
-        <div className="stat"><b>{sess.rom}°</b><small>Max range</small></div>
-        <div className="stat"><b>{fmt(sess.t)}</b><small>Duration</small></div>
-      </div>
-      <div className="card">
-        <div className="row sp">
-          <b>Pain after exercise</b>
-          <span className="big" style={{ fontSize: 30 }}>{r.pain}</span>
-        </div>
-        <input type="range" min={0} max={10} value={r.pain} aria-label="Pain after exercise" onChange={(ev) => set({ rp: { ...r, pain: Number(ev.target.value) } })} />
-      </div>
-      <h2>How difficult was it?</h2>
-      <div className="seg">
-        {['Easy', 'Moderate', 'Hard'].map((f) => (
-          <button key={f} type="button" className={r.diff === f ? 'on' : ''} onClick={() => set({ rp: { ...r, diff: f } })}>{f}</button>
-        ))}
-      </div>
-      {r.pain >= 7 && <div className="alert red">That is a high pain score. Please contact your care team before doing this exercise again.</div>}
-      <button type="button" className="btn" onClick={save}>Save and send to care team</button>
-    </>
-  )
+  return <>
+    <h1 style={{ marginTop: 10 }}>How did that feel?</h1>
+    <p className="sub">{exercise.name} · {session.count} reps in {fmt(session.t)}</p>
+    <div className="stats">
+      <div className="stat"><b>{session.count}</b><small>Reps</small></div>
+      <div className="stat"><b>{session.rom == null ? '—' : `${Math.round(session.rom)}°`}</b><small>Estimated range</small></div>
+      <div className="stat"><b>{fmt(session.t)}</b><small>Duration</small></div>
+    </div>
+    <div className="card"><div className="row sp"><b>Pain after exercise</b><span className="big" style={{ fontSize: 30 }}>{r.pain}</span></div>
+      <input type="range" min={0} max={10} value={r.pain} aria-label="Pain after exercise" onChange={event => set({ rp: { ...r, pain: Number(event.target.value) } })} />
+    </div>
+    <h2>How difficult was it?</h2>
+    <div className="seg">{['Easy', 'Moderate', 'Hard'].map(value => <button key={value} type="button" className={r.diff === value ? 'on' : ''} onClick={() => set({ rp: { ...r, diff: value } })}>{value}</button>)}</div>
+    {r.pain >= 7 && <div className="alert red">That is a high pain score. Please contact your care team before doing this exercise again.</div>}
+    {error && <div className="alert red" role="alert">{error}</div>}
+    <button type="button" className="btn" disabled={busy} onClick={save}>{busy ? 'Saving…' : 'Save and send to care team'}</button>
+  </>
 }

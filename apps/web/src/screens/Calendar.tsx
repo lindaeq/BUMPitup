@@ -81,6 +81,7 @@ export default function Calendar() {
     return (
       <>
         <h1 style={{ marginTop: 10 }}>Calendar</h1>
+      <div className="alert">The charts below use illustrative sample history. Your actual Firestore sessions appear under Recent sessions.</div>
         {seg}
         <div className="row sp" style={{ marginTop: 14 }}>
           <button type="button" className="ico" aria-label="Previous month" disabled={mi === 0} style={{ opacity: mi === 0 ? 0.35 : 1 }} onClick={() => setMi(mi - 1)}><Icon n="back" /></button>
@@ -130,6 +131,7 @@ export default function Calendar() {
     return (
       <>
         <h1 style={{ marginTop: 10 }}>Calendar</h1>
+      <div className="alert">The charts below use illustrative sample history. Your actual Firestore sessions appear under Recent sessions.</div>
         {seg}
         <div className="card">
           <div className="row sp"><b>Week {CURRENT_WEEK} of 40</b><span className="pill">{toGo} days to go</span></div>
@@ -192,6 +194,7 @@ export default function Calendar() {
   return (
     <>
       <h1 style={{ marginTop: 10 }}>Calendar</h1>
+      <div className="alert">The charts below use illustrative sample history. Your actual Firestore sessions appear under Recent sessions.</div>
       {seg}
       <div className="row" style={{ marginTop: 14 }}>
         {[4, 12, 24].map((n) => <button key={n} type="button" className={`chip ${range === n ? 'on' : ''}`} style={{ margin: 0 }} onClick={() => setRange(n)}>{n === 24 ? 'All time' : `Last ${n} weeks`}</button>)}
@@ -223,7 +226,7 @@ export default function Calendar() {
         {s.hist.map((h, i) => (
           <div key={`${h.n}-${i}`} className="item">
             <div className="ico"><Icon n="check" /></div>
-            <div><b>{h.n}</b><small>{h.d} · {h.r} reps · {h.rom}° range</small></div>
+            <div><b>{h.n}</b><small>{h.d} · {h.r} reps · {h.rom == null ? 'range unavailable' : `${Math.round(h.rom)}° estimated range`}</small></div>
             <span className="pill" style={{ marginLeft: 'auto' }}>Pain {h.p}</span>
           </div>
         ))}

@@ -20,7 +20,7 @@ export default function CheckInDone() {
     <>
       <div className="ok-ring"><Icon n="check" /></div>
       <h1 style={{ textAlign: 'center' }}>Check-in sent</h1>
-      <p className="sub" style={{ textAlign: 'center' }}>Dr. Grey will see it on her dashboard. Your exercise plan stays as assigned by your care team.</p>
+      <p className="sub" style={{ textAlign: 'center' }}>Your care team will see it on their dashboard. Your exercise plan stays as assigned by your care team.</p>
       <button type="button" className="btn" onClick={() => go('plan', null, 'plan')}>View exercise plan</button>
       <button type="button" className="btn ghost" onClick={() => go('home', null, 'home')}>Back to home</button>
     </>
