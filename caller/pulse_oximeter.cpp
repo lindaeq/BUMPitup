@@ -29,7 +29,7 @@ void Max30102_init() {
 
 void Max30102_readIR() {
     uint32_t IRvalue = particleSensor.getIR();
-    Serial.println(IRvalue);
+    
 }
 
 int Max30102_readHR() {
