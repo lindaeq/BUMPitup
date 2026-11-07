@@ -8,6 +8,11 @@ const P = {
   check: 'M5 12l5 5 9-10',
   cam: 'M4 8h3l2-3h6l2 3h3v11H4zM12 17a3.5 3.5 0 100-7 3.5 3.5 0 000 7z',
   band: 'M8 3h8l1 5H7zM8 21h8l1-5H7zM7 8h10v8H7z',
+  calendar: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
+  baby: 'M12 21a8 8 0 100-16 8 8 0 000 16zM9 11h.01M15 11h.01M9 15c1 1 5 1 6 0',
+  play: 'M8 5v14l11-7z',
+  pause: 'M8 5v14M16 5v14',
+  bulb: 'M9 18h6M10 21h4M12 3a6 6 0 00-4 10.5V16h8v-2.5A6 6 0 0012 3z',
   bell: 'M6 17V11a6 6 0 0112 0v6l2 2H4zM10 21h4',
 }
 export type IconName = keyof typeof P

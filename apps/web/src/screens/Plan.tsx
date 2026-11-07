@@ -6,7 +6,7 @@ export default function Plan() {
   return (
     <>
       <h1 style={{ marginTop: 10 }}>Exercise</h1>
-      <p className="sub">Assigned by Dr. Nair on Mon, Nov 2. Tap an exercise to see instructions.</p>
+      <p className="sub">Assigned by Dr. Grey on Mon, Nov 2. Tap an exercise to see instructions.</p>
       {s.ex.map((e) => (
         <button key={e.id} type="button" className="card row" style={{ width: '100%', textAlign: 'left' }} onClick={() => go('detail', e.id)}>
           <div className="ico"><Icon n={e.mode === 'cam' ? 'cam' : 'band'} /></div>

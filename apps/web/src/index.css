@@ -21,8 +21,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--mute);padding:6px 0;position:relative}
 .tab.on{color:var(--rose)}.tab svg{width:24px;height:24px}
 .badge{position:absolute;top:2px;left:calc(50% + 6px);background:var(--rose);color:#fff;font-size:10px;min-width:16px;height:16px;border-radius:8px;display:grid;place-items:center}
-h1{font-size:26px;line-height:1.15;margin:6px 0 4px;letter-spacing:-.02em;font-weight:500}
-h2{font-size:17px;margin:22px 0 10px;letter-spacing:-.01em;font-weight:600}
+h1{font-size:26px;font-weight:800;line-height:1.15;margin:6px 0 4px;letter-spacing:-.02em}
+h2{font-size:17px;font-weight:800;margin:22px 0 10px;letter-spacing:-.01em}
 .sub{color:var(--mute);font-size:14px;line-height:1.4;margin:0}
 .top{display:flex;align-items:center;gap:8px;min-height:40px}
 .back{display:flex;align-items:center;gap:2px;color:var(--rose);font-weight:600;font-size:15px}.back svg{width:20px;height:20px}
@@ -59,3 +59,30 @@ textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12
 @keyframes up{from{transform:translateY(10px);opacity:0}}
 .ok-ring{width:72px;height:72px;border-radius:50%;background:var(--okbg);color:var(--ok);display:grid;place-items:center;margin:28px auto 8px}.ok-ring svg{width:36px;height:36px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.tip{border-radius:16px;padding:14px;margin-top:10px;background:var(--blush);border:1px solid #f6c9d8}
+.tip.myth{background:var(--warnbg);border-color:#f3d79b}
+.tip b{font-size:15px}.tip p{margin:4px 0 0;font-size:13px;line-height:1.45}
+.tip .more{margin-top:8px;font-size:13px;font-weight:600;color:var(--rosed)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+.cal .wd{font-size:11px;color:var(--mute);text-align:center;font-weight:600}
+.cell{aspect-ratio:1;border-radius:10px;font-size:13px;font-weight:600;display:grid;place-items:center;position:relative;background:#f6efeb;color:var(--ink)}
+.cell.l1{background:#f9c9d8}.cell.l2{background:#ef7fa1}.cell.l3{background:var(--rose);color:#fff}
+.cell.off{opacity:.35}.cell.today{box-shadow:0 0 0 2px var(--ink)}.cell.sel{outline:2px solid var(--rosed);outline-offset:1px}
+.cell .ev{position:absolute;bottom:3px;width:5px;height:5px;border-radius:50%;background:var(--ink)}
+.cell .hp{position:absolute;top:3px;right:4px;width:5px;height:5px;border-radius:50%;background:#b42318}
+.months{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.mon{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:left}
+.mon b{font-size:13px}.mini{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:6px}
+.mini i{aspect-ratio:1;border-radius:2px;background:#f6efeb;display:block}
+.mini i.l1{background:#f9c9d8}.mini i.l2{background:#ef7fa1}.mini i.l3{background:var(--rose)}.mini i.off{background:transparent}
+.legend{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--mute);margin-top:10px}.legend i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.tri{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;margin-top:10px}.tri i{display:block;height:100%;background:#efe6e2;position:relative}.tri i u{position:absolute;inset:0;background:var(--rose);text-decoration:none}
+.fruitrow{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none}.fruitrow::-webkit-scrollbar{display:none}
+.fbtn{flex:none;width:74px;border:1.5px solid var(--line);border-radius:14px;padding:6px 0;background:var(--card);display:flex;flex-direction:column;align-items:center;font-size:11px;font-weight:600;color:var(--mute)}
+.fbtn.on{border-color:var(--rose);color:var(--rose);background:var(--blush)}
+
+.tick{width:18px;height:18px;flex:none;color:var(--rose);margin-top:1px}
+.tip .row{gap:8px}.tip .tick{margin:0}
+.babyrow{display:flex;align-items:center;gap:12px}.babyrow svg{display:block;flex:none}
+.fcenter{display:flex;justify-content:center;margin:2px 0 4px}.fcenter svg{display:block}

@@ -8,7 +8,8 @@ import Plan from './screens/Plan'
 import ExerciseDetail from './screens/ExerciseDetail'
 import Session from './screens/Session'
 import Report from './screens/Report'
-import Progress from './screens/Progress'
+import Calendar from './screens/Calendar'
+import Baby from './screens/Baby'
 import Care from './screens/Care'
 
 export default function App() {
@@ -39,7 +40,8 @@ export default function App() {
     detail: <ExerciseDetail />,
     session: <Session key={s.arg} />,
     report: <Report />,
-    progress: <Progress />,
+    calendar: <Calendar />,
+    baby: <Baby />,
     care: <Care />,
   }
 
