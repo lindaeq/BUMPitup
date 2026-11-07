@@ -3,7 +3,6 @@ import { useApp } from '../store'
 import Icon from '../components/Icon'
 import Fruit from '../components/Fruit'
 import { CURRENT_WEEK, TIPS, TODAY_IDX, WEEKLY_GOAL, fruitFor } from '../data'
-import { useArduinoSerial } from '../useArduinoSerial'
 
 const WEEK_START = Date.now() - 7 * 86400000
 
@@ -15,8 +14,6 @@ export default function Home() {
   const mins = Math.floor(s.hist.filter(h => h.at >= WEEK_START).reduce((a, h) => a + h.t, 0) / 60)
   const week = s.pregnancyWeek ?? CURRENT_WEEK
   const fruit = fruitFor(week)
-  const { supported, connected, connecting, live, restHR, error, connect, disconnect } = useArduinoSerial()
-  const heartRateChange = live.hr != null && restHR != null ? live.hr - restHR : null
   return (
     <>
       <div className="row sp" style={{ marginTop: 6 }}>
@@ -53,19 +50,6 @@ export default function Home() {
           <button type="button" className="btn" style={{ background: '#fff', color: 'var(--rosed)', marginTop: 14, height: 46 }} onClick={() => go('checkin')}>Start check-in</button>
         </div>
       )}
-
-      <div className="card" aria-label="Wristband heart rate">
-        <div className="row sp"><b>Wristband</b><span className={`pill ${connected ? 'ok' : ''}`}>{connected ? 'Connected' : 'Not connected'}</span></div>
-        <div className="stats">
-          <div className="stat"><b>{live.hr ?? '—'}</b><small>Current bpm</small></div>
-          <div className="stat"><b>{restHR ?? '—'}</b><small>Resting bpm</small></div>
-          <div className="stat"><b>{heartRateChange == null ? '—' : `${heartRateChange >= 0 ? '+' : ''}${heartRateChange}`}</b><small>Change (bpm)</small></div>
-        </div>
-        {supported ? <button type="button" className="chip" style={{ margin: '12px 0 0' }} disabled={connecting} onClick={() => { if (connected) void disconnect(); else void connect() }}>{connecting ? 'Connecting…' : connected ? 'Disconnect' : 'Connect wristband'}</button>
-          : <p className="sub" style={{ marginTop: 10 }}>Open this page in Chrome or Edge to connect.</p>}
-        {connected && live.hr == null && <p className="sub" style={{ marginTop: 8 }}>Waiting for a reading…</p>}
-        {error && <p className="sub" role="alert" style={{ marginTop: 8 }}>{error}</p>}
-      </div>
 
       <h2>This week</h2>
       <div className="card">
