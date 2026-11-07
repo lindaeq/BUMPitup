@@ -53,13 +53,10 @@ void OLED_display_rep(int rep) {
 //    Serial.println(adcValue); // Print the value to Serial Monitor
     display.display();
 }
-void OLED_display_HR(int minHR, int maxHR, int actualHR) {
-    if (minHR>999 || maxHR>999 || actualHR>999) {
-        OLED_warning("HR too high");
-        return;
-    }
-    coord hr_coord = find_coord(13+int_len(actualHR), -20);
-    coord range_coord = find_coord(12+int_len(minHR)+int_len(maxHR), 20);
+void OLED_display_HR(int minHR, int maxHR, int actualHR, int restHR) {
+    coord rhr_coord= find_coord(12+int_len(restHR));
+    coord hr_coord = find_coord(13+int_len(actualHR), -25);
+    coord range_coord = find_coord(12+int_len(minHR)+int_len(maxHR), 25);
     display.clearDisplay();
     display.setTextSize(1);
     display.setCursor(hr_coord.getX(), hr_coord.getY());
@@ -67,6 +64,10 @@ void OLED_display_HR(int minHR, int maxHR, int actualHR) {
     display.print(actualHR);
     display.print(" BPM");
 
+    display.setCursor(rhr_coord.getX(), rhr_coord.getY());
+    display.print("Change: ");
+    display.print(restHR);
+    display.print(" BPM");
     display.setCursor(range_coord.getX(), range_coord.getY());
     display.print("Range: ");
     display.print(minHR);
@@ -76,16 +77,23 @@ void OLED_display_HR(int minHR, int maxHR, int actualHR) {
 
     display.display();
 }
-void OLED_warning(const char* problem) {
-    coord warn_coord = find_coord(7, -20);
-    coord prob_coord = find_coord(strlen(problem), 20);
+void OLED_center(const char* message) {
+    coord prob_coord = find_coord(strlen(message));
     display.clearDisplay();
     display.setTextColor(SSD1306_WHITE);
     display.setTextSize(1);
 
-    display.setCursor(warn_coord.getX(), warn_coord.getY());
-    display.println("WARNING");
     display.setCursor(prob_coord.getX(), prob_coord.getY());
-    display.println(problem);
+    display.println(message);
+    display.display();
+}
+void OLED_center_int(int rhr){
+    coord rhr_coord = find_coord(int_len(rhr));
+    display.clearDisplay();
+    display.setTextColor(SSD1306_WHITE);
+
+    display.setTextSize(1);
+    display.setCursor(rhr_coord.getX(), rhr_coord.getY());
+    display.print(rhr);
     display.display();
 }

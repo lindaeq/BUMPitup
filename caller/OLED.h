@@ -21,8 +21,10 @@ coord find_coord(int len, int y_offset=0, int x_offset=0); //Finds the coordinat
 int int_len(int n);
 void OLED_init(); //Call in setup() to initialize the OLED display
 void OLED_display_rep(int rep); //Call each time rep changes
-void OLED_display_HR(int minHR, int maxHR, int actualHR); //Call to show the HR range and actual HR
-void OLED_warning(const char* problem); //Call to display a warning message
+void OLED_display_HR(int minHR, int maxHR, int actualHR, int restHR); //Call to show the HR range and actual HR
+void OLED_center(const char* message); //Call to display a warning message
+void OLED_center_int(int rhr);
+
 
 
 #endif

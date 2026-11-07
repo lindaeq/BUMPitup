@@ -10,7 +10,7 @@ int32_t heartRate;
 int8_t validSPO2;
 int8_t validHeartRate;
 
-int HR_c = -50; // Calibration offset, if needed
+int HR_c = 0; // Calibration offset, if needed
 
 void Max30102_init() {
     while (!particleSensor.begin()) {
@@ -48,11 +48,11 @@ int Max30102_readHR() {
 }
 
 int restingHR() {
-    int arr[10];
+    int arr[4];
     int count = 0;
 
-    // Collect 10 valid readings
-    while (count < 10) {
+    // Collect 4 valid readings
+    while (count < 4) {
         int reading = Max30102_readHR();
 
         if (reading != -1) {
@@ -60,11 +60,12 @@ int restingHR() {
             count++;
         }
 
-        delay(1000);
+        delay(500);
     }
 
-    std::sort(arr, arr + 10);
+    std::sort(arr, arr + 4);
 
     // Median of 10 values = average of the two middle values
-    return (arr[4] + arr[5]) / 2;
+    return (arr[1] + arr[2]) / 2;
 }
+
