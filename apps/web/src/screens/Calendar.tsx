@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useApp, type State } from '../store'
+import { plannedFor, upcomingPlan } from '../lib/schedule'
 import { BarChart, LineChart } from '../components/Charts'
 import Icon from '../components/Icon'
-import { CURRENT_WEEK, DUE, EVENTS, RECS, START, TODAY, WEEKLY_GOAL, WEEKS, addDays, dayIndex, iso, streak, weekOf, type Rec } from '../data'
+import { CURRENT_WEEK, DUE, EVENTS, RECS, START, TODAY, WEEKLY_GOAL, WEEKS, dayIndex, iso, streak, weekOf, type Rec } from '../data'
 
 const FAT = ['', 'Low', 'Moderate', 'High']
 const level = (m: number) => (m === 0 ? 0 : m < 15 ? 1 : m < 25 ? 2 : 3)
@@ -51,11 +52,13 @@ export default function Calendar() {
       const r = by.get(k)
       const inPreg = dayIndex(date) >= 0 && date <= DUE
       const lv = r ? level(r.mins) : 0
+      const planned = plannedFor(date, s.ex)
       if (mini) out.push(<i key={k} className={`${inPreg ? `l${lv}` : 'off'}`} />)
       else
         out.push(
-          <button key={k} type="button" className={`cell l${lv} ${inPreg ? '' : 'off'} ${k === todayK ? 'today' : ''} ${sel === k ? 'sel' : ''}`} onClick={() => setSel(k)} aria-label={k}>
+          <button key={k} type="button" className={`cell l${lv} ${inPreg ? '' : 'off'} ${k === todayK ? 'today' : ''} ${sel === k ? 'sel' : ''}`} onClick={() => setSel(k)} aria-label={`${k}${planned.length ? `, ${planned.length} planned exercise${planned.length > 1 ? 's' : ''}` : ''}`}>
             {d}
+            {planned.length > 0 && <span className="plan-dot" />}
             {EVENTS[k] && <span className="ev" />}
             {r && r.pain != null && r.pain >= 7 && <span className="hp" />}
           </button>,
@@ -78,10 +81,19 @@ export default function Calendar() {
     const r = by.get(sel)
     const ev = EVENTS[sel]
     const preg = dayIndex(sd) >= 0 && sd <= DUE
+    const planned = plannedFor(sd, s.ex)
+    const upcoming = upcomingPlan(s.ex)
     return (
       <>
         <h1 style={{ marginTop: 10 }}>Calendar</h1>
         {seg}
+        <div className="card sample-schedule">
+          <div className="row sp"><b>Exercise schedule</b><span className="pill">Mon · Wed · Fri</span></div>
+          {upcoming.length ? upcoming.map(date => <button key={iso(date)} type="button" className="schedule-row" onClick={() => { setSel(iso(date)); setMi(date.getMonth() - 4 + (date.getFullYear() - 2026) * 12) }}>
+            <span>{date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+            <b>{plannedFor(date, s.ex).map(exercise => exercise.name).join(' · ')}</b>
+          </button>) : <p className="sub" style={{ marginTop: 12 }}>Your assigned exercises will appear here when your care team adds them.</p>}
+        </div>
         <div className="row sp" style={{ marginTop: 14 }}>
           <button type="button" className="ico" aria-label="Previous month" disabled={mi === 0} style={{ opacity: mi === 0 ? 0.35 : 1 }} onClick={() => setMi(mi - 1)}><Icon n="back" /></button>
           <b style={{ fontSize: 17 }}>{mname(m)}</b>
@@ -94,7 +106,7 @@ export default function Calendar() {
         <div className="legend">
           <span>Active minutes</span><i style={{ background: '#f6efeb' }} />0<i style={{ background: '#f9c9d8' }} />&lt;15<i style={{ background: '#ef7fa1' }} />&lt;25<i style={{ background: 'var(--rose)' }} />25+
         </div>
-        <div className="legend" style={{ marginTop: 4 }}><i style={{ background: 'var(--ink)', width: 6, height: 6, borderRadius: 3 }} />Appointment<i style={{ background: '#b42318', width: 6, height: 6, borderRadius: 3, marginLeft: 8 }} />Pain 7 or higher</div>
+        <div className="legend" style={{ marginTop: 4 }}><i style={{ background: 'var(--rose)', width: 6, height: 6, borderRadius: 3 }} />Planned exercise<i style={{ background: 'var(--ink)', width: 6, height: 6, borderRadius: 3, marginLeft: 8 }} />Appointment</div>
 
         <div className="card">
           <div className="row sp">
@@ -102,6 +114,7 @@ export default function Calendar() {
             {preg && <span className="pill">Week {weekOf(sd)}</span>}
           </div>
           {ev && <div className="alert" style={{ marginTop: 10, background: 'var(--blush)', color: 'var(--rosed)' }}><b>{ev}</b></div>}
+          {planned.length > 0 && <div className="scheduled-detail"><b>Planned exercises</b>{planned.map(exercise => <p key={exercise.id}>{exercise.name}</p>)}</div>}
           {r ? (
             <>
               <div className="row" style={{ marginTop: 10, flexWrap: 'wrap' }}>
@@ -223,12 +236,11 @@ export default function Calendar() {
         {s.hist.map((h, i) => (
           <div key={`${h.n}-${i}`} className="item">
             <div className="ico"><Icon n="check" /></div>
-            <div><b>{h.n}</b><small>{h.d} · {h.r} reps · {h.rom}° range</small></div>
+            <div><b>{h.n}</b><small>{h.d} · {h.r} reps · {h.rom == null ? 'range unavailable' : `${Math.round(h.rom)}° estimated range`}</small></div>
             <span className="pill" style={{ marginLeft: 'auto' }}>Pain {h.p}</span>
           </div>
         ))}
       </div>
-      <p className="sub" style={{ fontSize: 12, marginTop: 10 }}>Demo data for Selina from {mname(addDays(START, 0), false)} 2026 to today.</p>
     </>
   )
 }

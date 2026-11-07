@@ -55,13 +55,16 @@ textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12
 .msg{max-width:82%;padding:11px 14px;border-radius:18px;font-size:14px;line-height:1.4;margin-top:10px}
 .msg.them{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:4px}.msg.me{background:var(--rose);color:#fff;margin-left:auto;border-bottom-right-radius:4px}
 .msg small{display:block;font-size:11px;opacity:.65;margin-top:4px}
+.chat-switch{border:1px solid #e8b9c8;background:var(--blush);color:var(--rosed);border-radius:999px;padding:8px 11px;font-size:12px;font-weight:700;white-space:nowrap}
+.exercise-idea{align-items:flex-start}.exercise-idea .pill{display:inline-block;margin-top:7px}.exercise-idea b{font-size:14px}
+.sample-schedule .sub{margin-top:7px}.schedule-row{display:flex;width:100%;align-items:center;justify-content:space-between;text-align:left;gap:12px;border-top:1px solid var(--line);padding:10px 0;font-size:12px}.schedule-row:first-of-type{margin-top:10px}.schedule-row span{color:var(--mute);white-space:nowrap}.schedule-row b{color:var(--rosed);font-size:12px;text-align:right}
+.scheduled-detail{border-radius:12px;background:var(--blush);padding:10px 12px;margin-top:12px;font-size:13px;color:var(--rosed)}.scheduled-detail p{margin:4px 0 0}
 .toast{position:absolute;left:20px;right:20px;bottom:90px;background:var(--ink);color:#fff;padding:13px 16px;border-radius:14px;font-size:14px;z-index:5;animation:up .25s}
 @keyframes up{from{transform:translateY(10px);opacity:0}}
 .ok-ring{width:72px;height:72px;border-radius:50%;background:var(--okbg);color:var(--ok);display:grid;place-items:center;margin:28px auto 8px}.ok-ring svg{width:36px;height:36px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 .tip{border-radius:16px;padding:14px;margin-top:10px;background:var(--blush);border:1px solid #f6c9d8}
-.tip.myth{background:var(--warnbg);border-color:#f3d79b}
 .tip b{font-size:15px}.tip p{margin:4px 0 0;font-size:13px;line-height:1.45}
 .tip .more{margin-top:8px;font-size:13px;font-weight:600;color:var(--rosed)}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
@@ -71,6 +74,7 @@ textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12
 .cell.off{opacity:.35}.cell.today{box-shadow:0 0 0 2px var(--ink)}.cell.sel{outline:2px solid var(--rosed);outline-offset:1px}
 .cell .ev{position:absolute;bottom:3px;width:5px;height:5px;border-radius:50%;background:var(--ink)}
 .cell .hp{position:absolute;top:3px;right:4px;width:5px;height:5px;border-radius:50%;background:#b42318}
+.cell .plan-dot{position:absolute;bottom:3px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--rose);box-shadow:0 0 0 1px #fff}
 .months{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .mon{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:left}
 .mon b{font-size:13px}.mini{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:6px}
@@ -85,4 +89,6 @@ textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12
 .tick{width:18px;height:18px;flex:none;color:var(--rose);margin-top:1px}
 .tip .row{gap:8px}.tip .tick{margin:0}
 .babyrow{display:flex;align-items:center;gap:12px}.babyrow svg{display:block;flex:none}
+.home-fruit{width:52px;height:52px;border-radius:16px;background:var(--blush);border:1px solid #f6c9d8;display:grid;place-items:center;flex:none}
+.home-fruit svg{display:block}
 .fcenter{display:flex;justify-content:center;margin:2px 0 4px}.fcenter svg{display:block}

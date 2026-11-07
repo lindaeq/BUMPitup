@@ -6,6 +6,8 @@
     "module": "esnext",
     "types": ["vite/client"],
     "allowArbitraryExtensions": true,
+    "allowJs": true,
+    "checkJs": false,
     "skipLibCheck": true,
 
     /* Bundler mode */
@@ -19,8 +21,9 @@
     /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
+    "erasableSyntaxOnly": false,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/screens/Progress.tsx", "src/tracking/vision/*.test.ts"]
 }

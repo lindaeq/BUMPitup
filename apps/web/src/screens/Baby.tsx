@@ -1,15 +1,20 @@
 import { useState } from 'react'
 import Fruit from '../components/Fruit'
+import BackBar from '../components/BackBar'
+import { useApp } from '../store'
 import { CURRENT_WEEK, FRUITS, fruitFor } from '../data'
 
 const tri = (w: number) => (w < 14 ? 'First trimester' : w < 28 ? 'Second trimester' : 'Third trimester')
 
 export default function Baby() {
-  const [week, setWeek] = useState(CURRENT_WEEK)
+  const { s } = useApp()
+  const currentWeek = s.pregnancyWeek ?? CURRENT_WEEK
+  const [week, setWeek] = useState(currentWeek)
   const f = fruitFor(week)
   const vowel = /^[aeiou]/.test(f.name) ? 'an' : 'a'
   return (
     <>
+      <BackBar to="home" label="Home" tab="home" />
       <h1 style={{ marginTop: 10 }}>Baby size</h1>
       <p className="sub">Drag the slider to see how your baby grows.</p>
 
@@ -19,7 +24,7 @@ export default function Baby() {
         <b style={{ fontSize: 17, fontWeight: 800 }}>About the size of {vowel} {f.name}</b>
         <p className="sub" style={{ marginTop: 2 }}>{f.cm} long · {f.g}</p>
         <input type="range" min={4} max={40} value={week} aria-label="Pregnancy week" onChange={(e) => setWeek(Number(e.target.value))} style={{ marginTop: 10 }} />
-        <div className="row sp sub" style={{ fontSize: 12 }}><span>Week 4</span>{week !== CURRENT_WEEK ? <button type="button" style={{ color: 'var(--rose)', fontWeight: 600 }} onClick={() => setWeek(CURRENT_WEEK)}>Back to this week</button> : <span>You are here</span>}<span>Week 40</span></div>
+        <div className="row sp sub" style={{ fontSize: 12 }}><span>Week 4</span>{week !== currentWeek ? <button type="button" style={{ color: 'var(--rose)', fontWeight: 600 }} onClick={() => setWeek(currentWeek)}>Back to this week</button> : <span>You are here</span>}<span>Week 40</span></div>
       </div>
 
       <h2>What to do at this stage</h2>

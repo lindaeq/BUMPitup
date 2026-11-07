@@ -12,13 +12,13 @@ export default function ExerciseDetail() {
       <BackBar to="plan" label="Exercise" />
       <h1>{e.name}</h1>
       <div className="row" style={{ margin: '4px 0', flexWrap: 'wrap' }}>
-        <span className="pill">{e.reps} reps · {e.sets} sets</span>
-        <span className="pill">{e.mode === 'cam' ? 'Camera' : 'Wristband'}</span>
+        <span className="pill">{e.reps} reps · {e.targetDurationSeconds} sec target</span>
+        <span className="pill">{e.mode === 'cam' ? 'Camera' : 'Manual'}</span>
         {e.done && <span className="pill ok">Done today</span>}
       </div>
       <StickFigure id={e.id} />
       <div className="card" style={{ background: 'var(--blush)', border: 0 }}>
-        <b style={{ color: 'var(--rosed)' }}>Note from Dr. Grey</b>
+        <b style={{ color: 'var(--rosed)' }}>Note from your care team</b>
         <p className="sub" style={{ marginTop: 4, color: 'var(--ink)' }}>{e.note}</p>
       </div>
       <h2>Before you start</h2>
@@ -41,7 +41,7 @@ export default function ExerciseDetail() {
       <div className="card">
         <b>What we measure</b>
         <p className="sub" style={{ marginTop: 4 }}>
-          Repetitions, duration and {e.rom.toLowerCase()}. {e.mode === 'cam' ? 'Video is processed on your phone and never saved.' : 'Data comes from your wristband sensor.'}
+          Repetitions, duration and {e.rom.toLowerCase()}. {e.mode === 'cam' ? 'Video is processed on your phone and never saved.' : 'Repetitions are entered manually.'}
         </p>
       </div>
       <button type="button" className="btn" onClick={() => go('session', e.id)}>Start exercise</button>

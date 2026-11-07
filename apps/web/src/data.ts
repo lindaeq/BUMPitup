@@ -80,17 +80,12 @@ export const streak = () => {
   return n
 }
 
-export type Tip = { kind: 'tip' | 'myth'; title: string; body: string }
+export type Tip = { title: string; body: string }
 export const TIPS: Tip[] = [
-  { kind: 'tip', title: 'Walk 30 minutes most days', body: 'Regular walking can lower the risk of gestational diabetes and helps you sleep. Ask Dr. Grey what suits you.' },
-  { kind: 'myth', title: 'Myth: you can’t run while pregnant', body: 'If Dr. Grey agrees, many people keep running at a comfortable pace. Use the talk test.' },
-  { kind: 'myth', title: 'Myth: exercise can harm your baby', body: 'For most healthy pregnancies, moderate exercise is safe. Avoid contact sports and fall risks.' },
-  { kind: 'myth', title: 'Myth: you’re eating for two', body: 'You need only about 300 to 450 extra calories a day in the later trimesters.' },
-  { kind: 'tip', title: 'Drink water through the day', body: 'Aim for 8 to 12 cups of fluids daily to help with cramps and fatigue.' },
-  { kind: 'myth', title: 'Myth: rest is best for back pain', body: 'Gentle movement often eases back pain better than bed rest.' },
-  { kind: 'myth', title: 'Myth: never raise your arms overhead', body: 'Reaching overhead does not wrap the cord around your baby’s neck.' },
-  { kind: 'tip', title: 'Sleep on your side', body: 'A pillow between your knees can ease hip and lower-back pressure.' },
-  { kind: 'tip', title: 'Move every hour', body: 'A couple of minutes of walking each hour supports circulation and reduces swelling.' },
+  { title: 'Walk 30 minutes most days', body: 'Regular walking can lower the risk of gestational diabetes and helps you sleep. Ask Dr. Grey what suits you.' },
+  { title: 'Drink water through the day', body: 'Aim for 8 to 12 cups of fluids daily to help with cramps and fatigue.' },
+  { title: 'Sleep on your side', body: 'A pillow between your knees can ease hip and lower-back pressure.' },
+  { title: 'Move every hour', body: 'A couple of minutes of walking each hour supports circulation and reduces swelling.' },
 ]
 
 export type FruitType = 'seed' | 'berry' | 'lime' | 'avocado' | 'banana' | 'cantaloupe' | 'eggplant' | 'coconut' | 'honeydew' | 'pumpkin'

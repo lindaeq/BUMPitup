@@ -6,7 +6,6 @@ const TABS: { k: Tab; label: string; icon: IconName }[] = [
   { k: 'home', label: 'Home', icon: 'home' },
   { k: 'plan', label: 'Exercise', icon: 'ex' },
   { k: 'calendar', label: 'Calendar', icon: 'calendar' },
-  { k: 'baby', label: 'Baby', icon: 'baby' },
   { k: 'care', label: 'Care team', icon: 'chat' },
 ]
 
