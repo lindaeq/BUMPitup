@@ -8,7 +8,7 @@ import { CURRENT_WEEK, DUE, EVENTS, RECS, START, TODAY, WEEKLY_GOAL, WEEKS, dayI
 const FAT = ['', 'Low', 'Moderate', 'High']
 const level = (m: number) => (m === 0 ? 0 : m < 15 ? 1 : m < 25 ? 2 : 3)
 const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-const mname = (d: Date, long = true) => d.toLocaleDateString('en-US', { month: long ? 'long' : 'short', year: long ? 'numeric' : undefined })
+const mname = (d: Date, language: string, long = true) => d.toLocaleDateString(language, { month: long ? 'long' : 'short', year: long ? 'numeric' : undefined })
 const parse = (k: string) => {
   const [y, m, d] = k.split('-').map(Number)
   return new Date(y, m - 1, d)
@@ -88,7 +88,7 @@ export default function Calendar() {
         {seg}
         <div className="row sp" style={{ marginTop: 14 }}>
           <button type="button" className="ico" aria-label="Previous month" disabled={mi === 0} style={{ opacity: mi === 0 ? 0.35 : 1 }} onClick={() => setMi(mi - 1)}><Icon n="back" /></button>
-          <b style={{ fontSize: 17 }}>{mname(m)}</b>
+          <b style={{ fontSize: 17 }}>{mname(m, s.language)}</b>
           <button type="button" className="ico" aria-label="Next month" disabled={mi === 9} style={{ opacity: mi === 9 ? 0.35 : 1 }} onClick={() => setMi(mi + 1)}><Icon n="chev" /></button>
         </div>
         <div className="cal">
@@ -102,7 +102,7 @@ export default function Calendar() {
 
         <div className="card">
           <div className="row sp">
-            <b>{sd.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</b>
+            <b>{sd.toLocaleDateString(s.language, { weekday: 'long', month: 'long', day: 'numeric' })}</b>
             {preg && <span className="pill">Week {weekOf(sd)}</span>}
           </div>
           {ev && <div className="alert" style={{ marginTop: 10, background: 'var(--blush)', color: 'var(--rosed)' }}><b>{ev}</b></div>}
@@ -145,7 +145,7 @@ export default function Calendar() {
             <i style={{ flex: 13 }}><u style={{ width: `${f3 * 100}%` }} /></i>
           </div>
           <div className="row sp sub" style={{ fontSize: 11, marginTop: 4 }}><span>Trimester 1</span><span>Trimester 2</span><span>Trimester 3</span></div>
-          <p className="sub" style={{ marginTop: 10, fontSize: 12 }}>Started {mname(START, false)} {START.getDate()}, 2026 · Estimated due date {mname(DUE, false)} {DUE.getDate()}, 2027</p>
+          <p className="sub" style={{ marginTop: 10, fontSize: 12 }}>Started {mname(START, s.language, false)} {START.getDate()}, 2026 · Estimated due date {mname(DUE, s.language, false)} {DUE.getDate()}, 2027</p>
         </div>
         <div className="stats">
           <div className="stat"><b>{RECS.reduce((a, r) => a + r.mins, 0).toLocaleString()}</b><small>Active minutes</small></div>
@@ -159,7 +159,7 @@ export default function Calendar() {
             const m = new Date(2026, 4 + i, 1)
             return (
               <button key={i} type="button" className="mon" onClick={() => { setMi(i); setMode('month') }}>
-                <b>{mname(m, false)} {String(m.getFullYear()).slice(2)}</b>
+                <b>{mname(m, s.language, false)} {String(m.getFullYear()).slice(2)}</b>
                 <div className="mini">{monthCells(m, true)}</div>
               </button>
             )
@@ -171,7 +171,7 @@ export default function Calendar() {
             const d = parse(k)
             return (
               <button key={k} type="button" className="item" onClick={() => { setMi(d.getMonth() - 4 + (d.getFullYear() - 2026) * 12); setSel(k); setMode('month') }}>
-                <div><b>{t}</b><small>{d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} · Week {weekOf(d)}</small></div>
+                <div><b>{t}</b><small>{d.toLocaleDateString(s.language, { weekday: 'short', month: 'short', day: 'numeric' })} · Week {weekOf(d)}</small></div>
                 <span className={`pill ${d <= TODAY ? 'ok' : ''}`} style={{ marginLeft: 'auto' }}>{d <= TODAY ? 'Done' : 'Upcoming'}</span>
               </button>
             )

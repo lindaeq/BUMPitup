@@ -18,7 +18,7 @@ export default function Home() {
     <>
       <div className="row sp" style={{ marginTop: 6 }}>
         <div>
-          <p className="sub">{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+          <p className="sub">{new Date().toLocaleDateString(s.language, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
           <h1>Hello, {s.patientName}</h1>
         </div>
         <div className="row" style={{ gap: 6 }}>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { useApp, type Tab } from '../store'
 import Icon, { type IconName } from './Icon'
+import { translateUi } from '../lib/translateUi'
 
 const TABS: { k: Tab; label: string; icon: IconName }[] = [
   { k: 'home', label: 'Home', icon: 'home' },
@@ -13,14 +14,17 @@ const TABS: { k: Tab; label: string; icon: IconName }[] = [
 export default function PhoneFrame({ children }: { children: ReactNode }) {
   const { s, go } = useApp()
   const scroller = useRef<HTMLDivElement>(null)
+  const phone = useRef<HTMLDivElement>(null)
   const showTabs = ['home', 'plan', 'calendar', 'baby', 'care', 'you'].includes(s.view)
 
   useEffect(() => {
     scroller.current?.scrollTo(0, 0)
   }, [s.view, s.arg])
 
+  useEffect(() => phone.current ? translateUi(phone.current, s.language) : undefined, [s.language])
+
   return (
-    <div className="phone" role="application" aria-label="BumpBridge patient app">
+    <div ref={phone} className="phone" role="application" aria-label="BumpBridge patient app">
       <div className="sb">
         <span>9:41</span>
         <span className="bat" />

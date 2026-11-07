@@ -40,7 +40,7 @@ export type State = {
   msgs: Msg[]
   sess: SessionResult | null
   toast: string | null
-  /** Preferred language code (BCP 47, e.g. 'es'). Saved only; the UI is not translated yet. */
+  /** Preferred patient interface language (BCP 47, e.g. 'es'). */
   language: string
 }
 
