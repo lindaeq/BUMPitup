@@ -20,23 +20,25 @@ For AI chat and the physiotherapist's AI summary, put your **OpenAI or Gemini AP
 
 ## Firebase demo setup
 
-In the **default Cloud Firestore database**, create or confirm `patients/demo-patient-01` with a fictional `name` string and a numeric `pregnancyWeek`. The app currently reports that this document is missing in the configured project. The provider dashboard reads it, and the patient app uses it for the greeting and pregnancy week. Assignments, check-ins, sessions and messages all use the same patient ID.
+In the **default Cloud Firestore database**, create or confirm `patients/demo-patient-01` with a fictional `name` string and a numeric `pregnancyWeek`. The patient can edit name, age, weight, and due date from You → Profile; those fields save to this document. Assignments, check-ins, sessions, messages, and the weekly schedule use the same patient ID.
 
-The checked-in [demo rules](firestore.demo.rules) need to be published separately: Firebase Console → Firestore Database → Rules → paste the file → **Publish**. They grant unauthenticated read/write access to specific fictional demo collections until **November 9, 2026 at 00:00 UTC**. No authentication distinguishes a patient from a provider; the URL switch is only a view switch. Use a dedicated demo project, never real patient data, and replace these rules with restrictive rules immediately after the demo. The repository does not deploy rules automatically. Existing published rules may accept older manual sessions but reject the new CV summary fields until you publish this version.
+The checked-in [demo rules](firestore.demo.rules) need to be published separately: Firebase Console → Firestore Database → Rules → paste the file → **Publish**. Publish the updated file for profile editing and `schedules/demo-patient-01` to work, then refresh both tabs. The rules expire **November 9, 2026 at 00:00 UTC**. No authentication distinguishes a patient from a provider; the URL switch is only a view switch. Use a dedicated demo project, never real patient data, and replace these rules with restrictive rules immediately after the demo. The repository does not deploy rules automatically.
 
 ## Connected demo flow
 
-1. The physiotherapist assigns or adjusts one of four exercises with repetition and duration targets and optional instructions. The newest assignment for each exercise is the patient's current plan.
+1. The physiotherapist assigns or adjusts one of four exercises with repetition and duration targets and optional instructions. The newest assignment for each exercise is the patient's current plan. In Weekly exercise schedule, choose an exercise or rest for each day and save; this repeats weekly and updates the patient calendar and today's home plan live.
 2. The patient receives the plan live, sees provider instructions, and starts an assigned exercise.
-3. Seated arm raises and wide-stance squats use the `cv` branch's MediaPipe tracker in the browser. The tracker asks for camera permission and loads the pose model/WASM from external URLs. Video stays on the device and is not uploaded. If the camera or tracking fails, the patient can enter repetitions manually. Bird-dog and wall push-ups use manual logging for now.
+3. All four exercises have MediaPipe tracking configurations in the browser. The tracker asks for camera permission and loads the pose model/WASM from external URLs. Video stays on the device and is not uploaded. If the camera or tracking fails, the patient can enter repetitions manually.
 4. On completion, the patient reports pain and difficulty. One summary goes to `sessions`, linked to the exact assignment. Only actual measured movement range is saved; heart rate remains `null` until real sensor integration exists.
 5. The provider sees the session and daily check-ins live. Patient questions and provider feedback appear in both views through `messages`.
 
-The patient Calendar's older charts are **illustrative sample history**, labeled as such in the app; the Recent sessions list comes from Firestore. The home plan, care-team messages, weekly active minutes, check-in status, and session results use Firestore data. No live ESP32 or heart-rate bridge is connected yet. CV angles are 2D estimates, not a clinical safety assessment.
+The patient Calendar's older charts still use illustrative history; the Recent sessions list comes from Firestore. The home plan, care-team messages, weekly active minutes, check-in status, and session results use Firestore data. The squat session can show live heart rate from a connected Arduino wristband. CV angles are 2D estimates, not a clinical safety assessment.
 
 ## Quick checks
 
 - Assign seated arm raises in the provider tab. Confirm the patient plan and instructions update without refreshing.
+- Save a weekly schedule in the provider tab. Confirm the patient's calendar and today's plan update without refreshing.
+- Edit the patient profile in You. Confirm the provider's patient card and the pregnancy week update.
 - Submit a daily check-in from the patient tab. Confirm it appears in the provider tab.
 - Complete an assigned exercise, report pain and difficulty, and confirm the session appears with a tracking mode and optional estimated range.
 - Send a message each way. Confirm it appears in the other tab.

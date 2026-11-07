@@ -4,4 +4,6 @@ Run from this folder with `npm install && npm run dev`. Patient view: `/`. Physi
 
 Firebase browser configuration goes in `.env.local` using the `VITE_FIREBASE_*` fields from `.env.example`. The AI key goes in the ignored `.env` file: `OPENAI_API_KEY=...` or `GEMINI_API_KEY=...`. One key enables both the separate educational Ask AI tab and the physiotherapist's on-demand summary. Restart the dev server after adding a key. Never commit either key or use a `VITE_` prefix for it.
 
+The patient app's You → Language menu translates interface text when a new language is selected. This feature needs `OPENAI_API_KEY` in `.env`; it makes no translation request on page load or when opening screens. Translations are saved in that browser's local storage and reused on later visits. English uses the original text. Patient and care-team messages remain as written.
+
 See the [repository README](../../README.md) for Firebase configuration, demo Firestore rules, and the integrated CV workflow.

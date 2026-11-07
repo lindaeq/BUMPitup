@@ -2,6 +2,21 @@ import { useEffect, useState } from 'react'
 import { fmt, useApp } from '../store'
 import Icon from '../components/Icon'
 import { ExerciseTracker, type CVResult, type Side } from '../tracking/vision'
+import { useArduinoSerial } from '../useArduinoSerial'
+
+function SquatHeartRate() {
+  const { supported, connected, connecting, live, error, connect, disconnect } = useArduinoSerial()
+
+  return <div className="card" aria-label="Squat heart rate">
+    <div className="row sp"><b>Heart rate</b><span className={`pill ${connected ? 'ok' : ''}`}>{connected ? 'Connected' : 'Not connected'}</span></div>
+    <div className="row" style={{ marginTop: 12, gap: 8 }}><span className="big">{live.hr ?? '—'}</span><span className="sub">bpm</span></div>
+    {connected && live.hr != null && live.hr > 130 && <div className="alert" role="alert">Heart rate above 130 bpm. Slow down and take a break.</div>}
+    {supported ? <button type="button" className="chip" style={{ margin: '12px 0 0' }} disabled={connecting} onClick={() => { if (connected) void disconnect(); else void connect() }}>{connecting ? 'Connecting…' : connected ? 'Disconnect' : 'Connect wristband'}</button>
+      : <p className="sub" style={{ marginTop: 10 }}>Open in Chrome or Edge to connect your wristband.</p>}
+    {connected && live.hr == null && <p className="sub" style={{ marginTop: 8 }}>Waiting for a reading…</p>}
+    {error && <p className="sub" role="alert" style={{ marginTop: 8 }}>{error}</p>}
+  </div>
+}
 
 export default function Session() {
   const { s, set, go } = useApp()
@@ -58,6 +73,7 @@ export default function Session() {
       <label>Repetitions completed<input type="number" min="0" max="10000" step="1" value={manualReps} onChange={event => setManualReps(event.target.value)} /></label>
       <p className="sub">Enter what you actually completed. No sensor measurements are assumed.</p>
     </div>}
+    {exercise.exerciseId === 'wide-stance-squat' && <SquatHeartRate />}
     <div className="row sp" style={{ marginTop: 14 }}>
       <div><div className="big">{reps}</div><small className="sub">of {exercise.reps} target reps</small></div>
       <div style={{ textAlign: 'right' }}><div style={{ fontSize: 30, fontWeight: 700 }}>{fmt(seconds)}</div><small className="sub">Duration</small></div>

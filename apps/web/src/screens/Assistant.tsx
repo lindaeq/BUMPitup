@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Icon from '../components/Icon'
+import { useApp } from '../store'
+import { loadTranslations } from '../lib/language'
 
 type ChatMessage = { who: 'me' | 'them'; text: string }
 const QUICK = [
@@ -9,6 +11,9 @@ const QUICK = [
 ]
 
 export default function Assistant() {
+  const { s } = useApp()
+  const translations = loadTranslations(s.language)
+  const t = (phrase: string) => translations?.[phrase] || phrase
   const [messages, setMessages] = useState<ChatMessage[]>([{ who: 'them', text: 'Hi! Ask me a pregnancy or wellness question.' }])
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
@@ -29,7 +34,7 @@ export default function Assistant() {
       try {
         response = await fetch('/api/chat', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message }), signal: controller.signal,
+          body: JSON.stringify({ message, language: s.language }), signal: controller.signal,
         })
       } finally { window.clearTimeout(timeout) }
       const data = await response.json().catch(() => ({}))
@@ -45,8 +50,8 @@ export default function Assistant() {
   return <>
     <p className="sub" style={{ marginTop: 16 }}>Ask a question here. AI replies are separate from care team messages.</p>
     <div>
-      {messages.map((item, index) => <div key={index} className={`msg ${item.who}`}>{item.text}<small>Now</small></div>)}
-      {sending && <div className="msg them">Thinking…<small>Now</small></div>}
+      {messages.map((item, index) => <div key={index} className={`msg ${item.who}`}>{index === 0 ? t(item.text) : item.text}<small>{t('Now')}</small></div>)}
+      {sending && <div className="msg them">{t('Thinking…')}<small>{t('Now')}</small></div>}
     </div>
     <div style={{ marginTop: 16 }}>
       {QUICK.map(question => <button key={question.label} type="button" className="chip" disabled={sending} onClick={() => void send(question.prompt)}>{question.label}</button>)}

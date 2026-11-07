@@ -2,12 +2,18 @@ import { useState } from 'react';
 import { exerciseById } from './exercises.js';
 import { usePatientCollection } from './usePatientCollection.js';
 
+function summaryPoints(summary) {
+  const lines = summary.split(/\n+/).map(line => line.replace(/^\s*(?:[-•*]|\d+[.)])\s*/, '').replace(/\*\*/g, '').trim()).filter(Boolean);
+  return (lines.length > 1 ? lines : summary.split(/(?<=[.!?])\s+(?=[A-Z])/)).slice(0, 3);
+}
+
 export default function AISummary() {
   const { items: sessions } = usePatientCollection('sessions');
   const { items: checkins } = usePatientCollection('checkins');
   const [summary, setSummary] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const points = summary ? summaryPoints(summary) : [];
 
   async function generateSummary() {
     if (loading || (!sessions.length && !checkins.length)) return;
@@ -44,7 +50,7 @@ export default function AISummary() {
       <button type="button" disabled={loading || (!sessions.length && !checkins.length)} onClick={generateSummary}>{loading ? 'Summarizing…' : summary ? 'Refresh' : 'Summarize'}</button>
     </div>
     {error && <p role="alert">{error}</p>}
-    <p role="status">{loading ? 'Summarizing recent activity…' : summary || 'A quick overview of recent activity.'}</p>
-    {summary && <small>Review against the original entries.</small>}
+    {loading ? <p role="status">Summarizing…</p> : points.length ? <div role="status"><ul className="provider-summary-points">{points.map((point, index) => <li key={`${index}-${point}`}>{point}</li>)}</ul></div> : <p className="provider-summary-empty">Three quick points from recent check-ins and sessions.</p>}
+    {summary && <small>Review the original logs before acting.</small>}
   </section>;
 }

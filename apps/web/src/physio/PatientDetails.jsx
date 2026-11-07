@@ -12,6 +12,6 @@ export default function PatientDetails() {
   }, error => setMessage(firebaseError(error))), []);
   return <section className="card"><h3>Patient</h3>
     {message && <p role="status">{message}</p>}
-    {patient && <p className="provider-patient-name"><strong>{patient.name}</strong><span>Pregnancy week {patient.pregnancyWeek ?? CURRENT_WEEK}</span></p>}
+    {patient && <p className="provider-patient-name"><strong>{patient.name}</strong><span>Pregnancy week {patient.pregnancyWeek ?? CURRENT_WEEK}{patient.age ? ` · Age ${patient.age}` : ''}</span>{patient.dueDate && <span>Due {new Date(`${patient.dueDate}T12:00:00`).toLocaleDateString()}</span>}</p>}
   </section>;
 }

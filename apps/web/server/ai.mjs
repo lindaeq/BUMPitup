@@ -26,10 +26,11 @@ export async function geminiText(key, model, instructions, prompt) {
   return answer.trim()
 }
 
-export async function openaiText(key, model, instructions, prompt) {
+export async function openaiText(key, model, instructions, prompt, maxTokens = 450, json = false) {
   const data = await request('https://api.openai.com/v1/chat/completions',
     { Authorization: `Bearer ${key}` },
-    { model, messages: [{ role: 'system', content: instructions }, { role: 'user', content: prompt }], temperature: 0.2, max_tokens: 450 })
+    { model, messages: [{ role: 'system', content: instructions }, { role: 'user', content: prompt }], temperature: 0.2, max_tokens: maxTokens,
+      ...(json ? { response_format: { type: 'json_object' } } : {}) })
   const answer = data?.choices?.[0]?.message?.content
   if (typeof answer !== 'string' || !answer.trim()) throw new Error('The AI returned an empty response.')
   return answer.trim()

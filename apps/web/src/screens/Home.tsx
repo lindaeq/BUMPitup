@@ -3,6 +3,7 @@ import { useApp } from '../store'
 import Icon from '../components/Icon'
 import Fruit from '../components/Fruit'
 import { CURRENT_WEEK, TIPS, TODAY_IDX, WEEKLY_GOAL, fruitFor } from '../data'
+import { plannedFor } from '../lib/schedule'
 
 const WEEK_START = Date.now() - 7 * 86400000
 
@@ -10,7 +11,10 @@ export default function Home() {
   const { s, go } = useApp()
   const [tipI, setTipI] = useState(TODAY_IDX % TIPS.length)
   const tip = TIPS[tipI]
-  const n = s.ex.filter((e) => e.done).length
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayExercises = plannedFor(today, s.ex, s.scheduleDays)
+  const n = todayExercises.filter((e) => e.done).length
   const mins = Math.floor(s.hist.filter(h => h.at >= WEEK_START).reduce((a, h) => a + h.t, 0) / 60)
   const week = s.pregnancyWeek ?? CURRENT_WEEK
   const fruit = fruitFor(week)
@@ -18,7 +22,7 @@ export default function Home() {
     <>
       <div className="row sp" style={{ marginTop: 6 }}>
         <div>
-          <p className="sub">{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+          <p className="sub">{new Date().toLocaleDateString(s.language, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
           <h1>Hello, {s.patientName}</h1>
         </div>
         <div className="row" style={{ gap: 6 }}>
@@ -60,12 +64,12 @@ export default function Home() {
       <h2>Today’s exercise plan</h2>
       <div className="card">
         <div className="row sp">
-          <b>{n} of {s.ex.length} completed</b>
-          <span className={`pill ${n === s.ex.length ? 'ok' : ''}`}>{s.ex.length === 0 ? 'No plan yet' : n === s.ex.length ? 'All done' : 'In progress'}</span>
+          <b>{n} of {todayExercises.length} completed</b>
+          <span className={`pill ${todayExercises.length > 0 && n === todayExercises.length ? 'ok' : ''}`}>{todayExercises.length === 0 ? 'No exercise today' : n === todayExercises.length ? 'All done' : 'In progress'}</span>
         </div>
-        <div className="bar" style={{ margin: '10px 0 6px' }}><i style={{ width: `${s.ex.length ? (n / s.ex.length) * 100 : 0}%` }} /></div>
+        <div className="bar" style={{ margin: '10px 0 6px' }}><i style={{ width: `${todayExercises.length ? (n / todayExercises.length) * 100 : 0}%` }} /></div>
         {s.ex.length === 0 && <p className="sub" style={{ marginTop: 8 }}>Your care team has not assigned an exercise yet.</p>}
-        {s.ex.map((e) => (
+        {todayExercises.map((e) => (
           <button key={e.id} type="button" className="item" onClick={() => go('detail', e.id, 'plan')}>
             <div className="ico"><Icon n={e.mode === 'cam' ? 'cam' : 'ex'} /></div>
             <div><b>{e.name}</b><small>{e.reps} reps · {e.targetDurationSeconds} sec target</small></div>
