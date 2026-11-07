@@ -16,3 +16,9 @@ Home, Daily check-in, Exercise plan, Exercise detail, Live session (camera / wri
 Camera and wristband sessions are simulated in `src/screens/Session.tsx`.
 Swap the `ph`-derived values for live MediaPipe output or the BMX160 WebSocket bridge.
 App state and demo data live in `src/store.ts`.
+
+## to use
+npm install
+npm install firebase
+add info to .env
+./node_modules/.bin/vite
