@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useApp, type State } from '../store'
-import { plannedFor, upcomingPlan } from '../lib/schedule'
+import { plannedFor } from '../lib/schedule'
 import { BarChart, LineChart } from '../components/Charts'
 import Icon from '../components/Icon'
 import { CURRENT_WEEK, DUE, EVENTS, RECS, START, TODAY, WEEKLY_GOAL, WEEKS, dayIndex, iso, streak, weekOf, type Rec } from '../data'
@@ -82,18 +82,10 @@ export default function Calendar() {
     const ev = EVENTS[sel]
     const preg = dayIndex(sd) >= 0 && sd <= DUE
     const planned = plannedFor(sd, s.ex)
-    const upcoming = upcomingPlan(s.ex)
     return (
       <>
         <h1 style={{ marginTop: 10 }}>Calendar</h1>
         {seg}
-        <div className="card sample-schedule">
-          <div className="row sp"><b>Exercise schedule</b><span className="pill">Mon · Wed · Fri</span></div>
-          {upcoming.length ? upcoming.map(date => <button key={iso(date)} type="button" className="schedule-row" onClick={() => { setSel(iso(date)); setMi(date.getMonth() - 4 + (date.getFullYear() - 2026) * 12) }}>
-            <span>{date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-            <b>{plannedFor(date, s.ex).map(exercise => exercise.name).join(' · ')}</b>
-          </button>) : <p className="sub" style={{ marginTop: 12 }}>Your assigned exercises will appear here when your care team adds them.</p>}
-        </div>
         <div className="row sp" style={{ marginTop: 14 }}>
           <button type="button" className="ico" aria-label="Previous month" disabled={mi === 0} style={{ opacity: mi === 0 ? 0.35 : 1 }} onClick={() => setMi(mi - 1)}><Icon n="back" /></button>
           <b style={{ fontSize: 17 }}>{mname(m)}</b>

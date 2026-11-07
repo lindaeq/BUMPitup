@@ -20,7 +20,7 @@ body:has(.provider-root) { display: block; padding: 0; background: #f8f5f3; colo
 .provider-root .provider-schedule-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .provider-root .provider-schedule-heading h3 { margin: 0; }
 .provider-root .provider-schedule-heading span { color: #9d2b50; background: #f9eaf0; border-radius: 99px; padding: 5px 10px; font-size: 12px; font-weight: 700; white-space: nowrap; }
-.provider-root .provider-schedule-days { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.provider-root .provider-schedule-days { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
 .provider-root .provider-schedule-day { display: flex; flex-direction: column; gap: 5px; border: 1px solid #eee2e5; background: #fcf8f9; border-radius: 12px; padding: 12px; }
 .provider-root .provider-schedule-day span { color: #7a6870; font-size: 12px; }
 .provider-root .provider-schedule-day strong { color: #3c2b32; font-size: 13px; line-height: 1.4; }
@@ -52,5 +52,5 @@ body:has(.provider-root) { display: block; padding: 0; background: #f8f5f3; colo
 .provider-root .provider-summary-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .provider-root .provider-summary-heading h3 { margin: 0; }
 .provider-root .provider-summary-heading button { padding: 8px 12px; white-space: nowrap; }
-@media (max-width: 760px) { .provider-root { padding: 22px 16px 48px; } .provider-root .provider-overview, .provider-root .columns, .provider-root .provider-graphs { grid-template-columns: 1fr; } .provider-heading { align-items: start; } }
+@media (max-width: 760px) { .provider-root { padding: 22px 16px 48px; } .provider-root .provider-overview, .provider-root .columns, .provider-root .provider-graphs { grid-template-columns: 1fr; } .provider-root .provider-schedule-days { grid-template-columns: repeat(2, minmax(0, 1fr)); } .provider-heading { align-items: start; } }
 @media (max-width: 480px) { .provider-heading { flex-direction: column; gap: 10px; } .provider-root .card { padding: 18px; } .provider-root .provider-summary-heading { align-items: start; flex-direction: column; } .provider-root .provider-schedule-days { grid-template-columns: 1fr; } }

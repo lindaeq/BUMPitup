@@ -17,7 +17,7 @@ function CurrentSchedule() {
   }));
   const dates = upcomingPlan(exercises);
   return <section className="card provider-schedule">
-    <div className="provider-schedule-heading"><h3>Exercise schedule</h3><span>Mon · Wed · Fri</span></div>
+    <div className="provider-schedule-heading"><h3>Exercise schedule</h3><span>Next 7 days</span></div>
     {status !== 'Live · connected to Firestore' && <p role="status">{status}</p>}{error && <p role="alert">{error}</p>}
     {dates.length ? <div className="provider-schedule-days">{dates.map(date => <div key={date.toDateString()} className="provider-schedule-day">
       <span>{date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
