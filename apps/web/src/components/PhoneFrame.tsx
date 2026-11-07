@@ -5,14 +5,15 @@ import Icon, { type IconName } from './Icon'
 const TABS: { k: Tab; label: string; icon: IconName }[] = [
   { k: 'home', label: 'Home', icon: 'home' },
   { k: 'plan', label: 'Exercise', icon: 'ex' },
-  { k: 'progress', label: 'Progress', icon: 'chart' },
+  { k: 'calendar', label: 'Calendar', icon: 'calendar' },
+  { k: 'baby', label: 'Baby', icon: 'baby' },
   { k: 'care', label: 'Care team', icon: 'chat' },
 ]
 
 export default function PhoneFrame({ children }: { children: ReactNode }) {
   const { s, go } = useApp()
   const scroller = useRef<HTMLDivElement>(null)
-  const showTabs = ['home', 'plan', 'progress', 'care'].includes(s.view)
+  const showTabs = ['home', 'plan', 'calendar', 'baby', 'care'].includes(s.view)
 
   useEffect(() => {
     scroller.current?.scrollTo(0, 0)

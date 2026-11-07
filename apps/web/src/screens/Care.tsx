@@ -20,7 +20,7 @@ export default function Care() {
     setText('')
     window.setTimeout(() => {
       set((st) => ({
-        msgs: [...st.msgs, { w: 'them', t: 'Thanks Maya, your message has been received. I’ll reply during clinic hours.', tm: 'Now' }],
+        msgs: [...st.msgs, { w: 'them', t: 'Thanks Selina, your message has been received. I’ll reply during clinic hours.', tm: 'Now' }],
         unread: st.view === 'care' ? 0 : st.unread + 1,
       }))
     }, 1400)
@@ -29,18 +29,15 @@ export default function Care() {
   return (
     <>
       <div className="row" style={{ marginTop: 6 }}>
-        <div className="ico" style={{ borderRadius: '50%' }}>PN</div>
+        <div className="ico" style={{ borderRadius: '50%' }}>MG</div>
         <div>
-          <b>Dr. Priya Nair</b>
+          <b>Dr. Meredith Grey</b>
           <p className="sub">Obstetrics · Care team</p>
         </div>
       </div>
       <div>
         {s.msgs.map((m, i) => (
-          <div key={i} className={`msg ${m.w}`}>
-            {m.t}
-            <small>{m.tm}</small>
-          </div>
+          <div key={i} className={`msg ${m.w}`}>{m.t}<small>{m.tm}</small></div>
         ))}
       </div>
       <div style={{ marginTop: 16 }}>

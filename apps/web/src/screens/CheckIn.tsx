@@ -12,19 +12,14 @@ export default function CheckIn() {
 
   const submit = () => {
     const urgent = c.pain >= 8 || c.sym.some((x) => URGENT.includes(x))
-    set((st) => ({
-      checked: true,
-      res: urgent ? 'urgent' : 'ok',
-      view: 'cidone',
-      week: st.week.map((d, i) => (i === 6 ? { ...d, p: c.pain } : d)),
-    }))
+    set({ checked: true, res: urgent ? 'urgent' : 'ok', view: 'cidone' })
   }
 
   return (
     <>
       <BackBar to="home" label="Home" />
       <h1>How is your body today?</h1>
-      <p className="sub">Your answers go to Dr. Nair’s dashboard.</p>
+      <p className="sub">Your answers go to Dr. Grey’s dashboard.</p>
 
       <div className="card">
         <div className="row sp">

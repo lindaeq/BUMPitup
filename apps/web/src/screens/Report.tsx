@@ -11,7 +11,6 @@ export default function Report() {
     set((st) => ({
       ex: st.ex.map((x) => (x.id === e.id ? { ...x, done: true } : x)),
       hist: [{ n: e.name, d: 'Sat, Nov 7', r: sess.count, rom: sess.rom, p: r.pain, df: r.diff }, ...st.hist],
-      week: st.week.map((d, i) => (i === 6 ? { ...d, s: 1 } : d)),
       sess: null,
     }))
     go('plan', null, 'plan')
