@@ -10,7 +10,7 @@ int32_t heartRate;
 int8_t validSPO2;
 int8_t validHeartRate;
 
-int HR_c = 0; // Calibration offset, if needed
+int HR_c = -50; // Calibration offset, if needed
 
 void Max30102_init() {
     while (!particleSensor.begin()) {
