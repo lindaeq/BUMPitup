@@ -46,10 +46,10 @@ export default function Home() {
         </div>
       )}
 
-      <div className={`tip ${tip.kind}`} style={{ marginTop: 12 }}>
+      <div className="tip" style={{ marginTop: 12 }}>
         <div className="row" style={{ gap: 8 }}>
           <Icon n="bulb" className="tick" />
-          <span className={`pill ${tip.kind === 'myth' ? 'warn' : ''}`}>{tip.kind === 'myth' ? 'Myth buster' : 'Tip of the day'}</span>
+          <span className="pill">Tip of the day</span>
         </div>
         <p style={{ marginTop: 6 }}><b>{tip.title}</b></p>
         <p>{tip.body}</p>

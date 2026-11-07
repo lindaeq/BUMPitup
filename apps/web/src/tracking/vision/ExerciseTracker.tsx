@@ -62,6 +62,7 @@ export function ExerciseTracker({
   thresholdOverrides,
   onError,
   showOverlay = true,
+  showReadout = true,
   mirrored = true,
   wasmBasePath = DEFAULT_WASM_BASE_PATH,
   modelAssetPath = DEFAULT_MODEL_ASSET_PATH,
@@ -276,7 +277,7 @@ export function ExerciseTracker({
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", transform: flip, pointerEvents: "none" }}
       />
 
-      {showOverlay && (
+      {showOverlay && showReadout && (
         <div style={hudStyle} aria-live="polite">
           <div style={{ fontWeight: 600 }}>{config?.label ?? exerciseId}</div>
           {config?.kind === "hold" ? (
@@ -305,7 +306,7 @@ export function ExerciseTracker({
           {status === "error" && (errorMessage ?? "Something went wrong")}
         </div>
       )}
-      {status === "running" && showOverlay && hud.trackingQuality !== "good" && config && (
+      {status === "running" && showOverlay && showReadout && hud.trackingQuality !== "good" && config && (
         <div style={{ ...hintStyle }}>{config.cameraHint}</div>
       )}
     </div>

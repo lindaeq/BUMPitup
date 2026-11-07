@@ -5,6 +5,8 @@ import { EXERCISES, exerciseById } from './exercises.js';
 import { displayTime, latestAssignments, usePatientCollection } from './usePatientCollection.js';
 import PatientDetails from './PatientDetails.jsx';
 import Messages from './Messages.jsx';
+import PatientGraphs from './PatientGraphs.jsx';
+import AISummary from './AISummary.jsx';
 
 function AssignmentEditor() {
   const { items, status, error } = usePatientCollection('assignments');
@@ -79,5 +81,5 @@ function Feed({ kind }) {
   </section>;
 }
 export default function PhysioDashboard() {
-  return <><h2>Physiotherapist dashboard</h2><PatientDetails /><div className="columns"><div><AssignmentEditor /><Messages sender="provider" /></div><div><Feed kind="checkins" /><Feed kind="sessions" /></div></div></>;
+  return <><h2>Physiotherapist dashboard</h2><PatientDetails /><AISummary /><PatientGraphs /><div className="columns"><div><AssignmentEditor /><Messages sender="provider" /></div><div><Feed kind="checkins" /><Feed kind="sessions" /></div></div></>;
 }

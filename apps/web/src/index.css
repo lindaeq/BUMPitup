@@ -61,7 +61,6 @@ textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 .tip{border-radius:16px;padding:14px;margin-top:10px;background:var(--blush);border:1px solid #f6c9d8}
-.tip.myth{background:var(--warnbg);border-color:#f3d79b}
 .tip b{font-size:15px}.tip p{margin:4px 0 0;font-size:13px;line-height:1.45}
 .tip .more{margin-top:8px;font-size:13px;font-weight:600;color:var(--rosed)}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}

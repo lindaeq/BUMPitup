@@ -82,6 +82,8 @@ export interface ExerciseTrackerProps {
   onError?: (error: Error) => void;
   /** Draw the pose skeleton and live readout on the preview. Default true. */
   showOverlay?: boolean;
+  /** Show the text readout on the video. Default true. Pose drawing remains visible. */
+  showReadout?: boolean;
   /** Mirror the preview like a selfie camera. Does not affect angles. Default true. */
   mirrored?: boolean;
   /** Override where MediaPipe's WASM files are loaded from. */

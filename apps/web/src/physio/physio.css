@@ -17,4 +17,11 @@
 .provider-root small { color: #526b66; }
 .provider-root .notes { white-space: pre-wrap; }
 .provider-root [role=alert] { color: #a32121; }
+.provider-root .provider-graphs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.provider-root .provider-chart { width: 100%; height: 250px; margin-top: 15px; }
+.provider-root .provider-ai-summary { border-left: 4px solid #4285f4; }
+.provider-root .provider-summary-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.provider-root .provider-summary-heading h3 { margin: 0; }
+.provider-root .provider-summary-heading button { padding: 7px 11px; font-size: .9rem; }
 @media (max-width: 680px) { .provider-root .columns { grid-template-columns: 1fr; } }
+@media (max-width: 680px) { .provider-root .provider-graphs { grid-template-columns: 1fr; } }

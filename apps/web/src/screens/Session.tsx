@@ -49,7 +49,7 @@ export default function Session() {
           <option value="left">My left side</option><option value="right">My right side</option>
         </select>
       </label>
-      <div className="cam"><ExerciseTracker exerciseId={exercise.exerciseId} side={side} active={active} onUpdate={setResult} onError={error => setCameraError(error.message)} style={{ height: '100%', maxWidth: 'none' }} /></div>
+      <div className="cam"><ExerciseTracker exerciseId={exercise.exerciseId} side={side} active={active} showReadout={false} onUpdate={setResult} onError={error => setCameraError(error.message)} style={{ height: '100%', maxWidth: 'none' }} /></div>
       {cameraError && <div className="alert red" role="alert">{cameraError}</div>}
       <p className="sub" style={{ marginTop: 8 }}>Video stays on this device. Angles are estimates.</p>
       <button type="button" className="btn alt" onClick={() => { setActive(false); setManualReps(String(result?.reps ?? 0)); setManual(true); setCameraError(''); setActive(true) }}>Use manual count instead</button>
