@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // DEMO ONLY: unauthenticated access, never production security.
+    // Expires November 9, 2026 at 00:00 UTC. Adjust for your demo day.
+    function demoActive() {
+      return request.time < timestamp.date(2026, 11, 9);
+    }
+    function rating(value) {
+      return value is int && value >= 0 && value <= 10;
+    }
+    function text(value, maximum) {
+      return value is string && value.size() <= maximum;
+    }
+    function heartRate(value) {
+      return value == null || (value is int && value >= 1 && value <= 300);
+    }
+    function base(data) {
+      return data.patientId == 'demo-patient-01' && data.createdAt == request.time;
+    }
+    function validExercise(id) {
+      return id in ['wide-stance-squat', 'bird-dog', 'wall-push-up', 'seated-arm-raise'];
+    }
+    match /assignments/{id} {
+      allow read: if demoActive() && resource.data.patientId == 'demo-patient-01';
+      allow create: if demoActive() && base(request.resource.data)
+        && request.resource.data.keys().hasAll(['patientId', 'createdAt', 'exerciseId', 'targetReps', 'targetDurationSeconds', 'instructions'])
+        && request.resource.data.keys().hasOnly(['patientId', 'createdAt', 'exerciseId', 'targetReps', 'targetDurationSeconds', 'instructions'])
+        && validExercise(request.resource.data.exerciseId)
+        && request.resource.data.targetReps is int
+        && request.resource.data.targetReps >= 0 && request.resource.data.targetReps <= 10000
+        && request.resource.data.targetDurationSeconds is int
+        && request.resource.data.targetDurationSeconds >= 1 && request.resource.data.targetDurationSeconds <= 86400
+        && text(request.resource.data.instructions, 2000);
+    }
+    match /messages/{id} {
+      allow read: if demoActive() && resource.data.patientId == 'demo-patient-01';
+      allow create: if demoActive() && base(request.resource.data)
+        && request.resource.data.keys().hasAll(['patientId', 'createdAt', 'sender', 'text'])
+        && request.resource.data.keys().hasOnly(['patientId', 'createdAt', 'sender', 'text'])
+        && request.resource.data.sender in ['patient', 'provider']
+        && text(request.resource.data.text, 2000)
+        && request.resource.data.text.size() > 0;
+    }
+    match /patients/{patientId} {
+      allow get: if demoActive() && patientId == 'demo-patient-01';
+    }
+    match /checkins/{id} {
+      allow read: if demoActive() && resource.data.patientId == 'demo-patient-01';
+      allow create: if demoActive() && base(request.resource.data)
+        && request.resource.data.keys().hasAll(['patientId', 'createdAt', 'painLevel', 'fatigue', 'discomfortLocation', 'notes'])
+        && request.resource.data.keys().hasOnly(['patientId', 'createdAt', 'painLevel', 'fatigue', 'discomfortLocation', 'notes'])
+        && rating(request.resource.data.painLevel)
+        && rating(request.resource.data.fatigue)
+        && text(request.resource.data.discomfortLocation, 120)
+        && request.resource.data.discomfortLocation.size() > 0
+        && text(request.resource.data.notes, 2000);
+    }
+    match /sessions/{id} {
+      allow read: if demoActive() && resource.data.patientId == 'demo-patient-01';
+      allow create: if demoActive() && base(request.resource.data)
+        && request.resource.data.keys().hasAll(['patientId', 'createdAt', 'exerciseId', 'assignmentId', 'trackingMode', 'repsCompleted', 'durationSeconds', 'painLevel', 'difficulty', 'notes', 'heartRateBefore', 'heartRateAfter'])
+        && request.resource.data.keys().hasOnly(['patientId', 'createdAt', 'exerciseId', 'assignmentId', 'trackingMode', 'repsCompleted', 'durationSeconds', 'painLevel', 'difficulty', 'notes', 'heartRateBefore', 'heartRateAfter'])
+        && validExercise(request.resource.data.exerciseId)
+        && request.resource.data.assignmentId is string
+        && request.resource.data.assignmentId.size() > 0
+        && request.resource.data.trackingMode == 'manual'
+        && request.resource.data.repsCompleted is int
+        && request.resource.data.repsCompleted >= 0 && request.resource.data.repsCompleted <= 10000
+        && request.resource.data.durationSeconds is int
+        && request.resource.data.durationSeconds >= 1 && request.resource.data.durationSeconds <= 86400
+        && rating(request.resource.data.painLevel)
+        && request.resource.data.difficulty in ['easy', 'moderate', 'hard']
+        && text(request.resource.data.notes, 2000)
+        && heartRate(request.resource.data.heartRateBefore)
+        && heartRate(request.resource.data.heartRateAfter);
+    }
+    // All other operations, including updates/deletes, are denied by default.
+  }
+}
