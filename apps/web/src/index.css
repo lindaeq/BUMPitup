@@ -84,4 +84,6 @@ textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12
 .tick{width:18px;height:18px;flex:none;color:var(--rose);margin-top:1px}
 .tip .row{gap:8px}.tip .tick{margin:0}
 .babyrow{display:flex;align-items:center;gap:12px}.babyrow svg{display:block;flex:none}
+.home-fruit{width:52px;height:52px;border-radius:16px;background:var(--blush);border:1px solid #f6c9d8;display:grid;place-items:center;flex:none}
+.home-fruit svg{display:block}
 .fcenter{display:flex;justify-content:center;margin:2px 0 4px}.fcenter svg{display:block}

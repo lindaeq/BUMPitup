@@ -2,10 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import Icon from '../components/Icon'
 
 type ChatMessage = { who: 'me' | 'them'; text: string }
-const QUICK = ['What are some gentle ways to ease back tightness?', 'Can you explain my exercise plan?', 'When should I contact my care team?']
+const QUICK = [
+  { label: 'Back tightness', prompt: 'What are gentle ways to ease back tightness during pregnancy?' },
+  { label: 'Exercise plan', prompt: 'How should I think about a pregnancy exercise plan?' },
+  { label: 'When to get help', prompt: 'When should I contact my maternity care team?' },
+]
 
 export default function Assistant() {
-  const [messages, setMessages] = useState<ChatMessage[]>([{ who: 'them', text: 'Hi! I’m the BumpBridge AI assistant. I can answer general pregnancy and wellness questions. This chat does not send messages to your care team.' }])
+  const [messages, setMessages] = useState<ChatMessage[]>([{ who: 'them', text: 'Hi! Ask me a pregnancy or wellness question.' }])
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const end = useRef<HTMLDivElement>(null)
@@ -48,13 +52,12 @@ export default function Assistant() {
       {sending && <div className="msg them">Thinking…<small>Now</small></div>}
     </div>
     <div style={{ marginTop: 16 }}>
-      {QUICK.map(question => <button key={question} type="button" className="chip" disabled={sending} onClick={() => void send(question)}>{question}</button>)}
+      {QUICK.map(question => <button key={question.label} type="button" className="chip" disabled={sending} onClick={() => void send(question.prompt)}>{question.label}</button>)}
     </div>
     <div className="row" style={{ marginTop: 6 }}>
       <textarea rows={1} maxLength={4000} placeholder="Ask a general pregnancy or wellness question" value={text} disabled={sending} onChange={event => setText(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); void send(text) } }} />
       <button type="button" className="ico" style={{ background: 'var(--rose)', color: '#fff', width: 48, height: 48 }} aria-label="Send to AI assistant" disabled={sending || !text.trim()} onClick={() => void send(text)}><Icon n="chev" /></button>
     </div>
-    <p className="sub" style={{ fontSize: 12, marginTop: 10 }}>This AI assistant offers general education, not medical advice. It does not message your care team. For personal medical questions, contact your clinician. For urgent symptoms, contact maternity triage or emergency services.</p>
     <div ref={end} />
   </>
 }

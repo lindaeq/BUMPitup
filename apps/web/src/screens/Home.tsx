@@ -21,12 +21,17 @@ export default function Home() {
           <p className="sub">{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
           <h1>Hello, {s.patientName}</h1>
         </div>
-        <button type="button" className="ico" aria-label="Care team messages" onClick={() => go('care', null, 'care')}>
-          <Icon n="bell" />
-        </button>
+        <div className="row" style={{ gap: 6 }}>
+          <button type="button" className="ico" aria-label="Care team messages" onClick={() => go('care', null, 'care')}>
+            <Icon n="bell" />
+          </button>
+          <button type="button" className="home-fruit" aria-label={`Baby size: ${fruit.name}. Open baby page`} title={`Baby size: ${fruit.name}`} onClick={() => go('baby', null, 'home')}>
+            <Fruit type={fruit.type} size={46} />
+          </button>
+        </div>
       </div>
       <div className="row" style={{ marginTop: 2 }}>
-        <span className="pill">Week {s.pregnancyWeek ?? '—'}</span>
+        <span className="pill">{s.pregnancyWeek == null ? `Demo week ${CURRENT_WEEK}` : `Week ${s.pregnancyWeek}`}</span>
         {s.pregnancyWeek != null && <span className="pill">{s.pregnancyWeek < 13 ? 'First' : s.pregnancyWeek < 28 ? 'Second' : 'Third'} trimester</span>}
       </div>
 
@@ -45,28 +50,6 @@ export default function Home() {
           <button type="button" className="btn" style={{ background: '#fff', color: 'var(--rosed)', marginTop: 14, height: 46 }} onClick={() => go('checkin')}>Start check-in</button>
         </div>
       )}
-
-      <div className="tip" style={{ marginTop: 12 }}>
-        <div className="row" style={{ gap: 8 }}>
-          <Icon n="bulb" className="tick" />
-          <span className="pill">Tip of the day</span>
-        </div>
-        <p style={{ marginTop: 6 }}><b>{tip.title}</b></p>
-        <p>{tip.body}</p>
-        <button type="button" className="more" onClick={() => setTipI((tipI + 1) % TIPS.length)}>Show another tip</button>
-      </div>
-
-
-      {s.pregnancyWeek != null && <button type="button" className="card row" style={{ width: '100%', textAlign: 'left', padding: 12 }} onClick={() => go('baby', null, 'baby')}>
-        <div className="babyrow" style={{ flex: 1 }}>
-          <Fruit type={fruit.type} size={56} />
-          <div>
-            <b>Your baby is the size of a {fruit.name}</b>
-            <p className="sub" style={{ marginTop: 2 }}>About {fruit.cm} and {fruit.g}. See this week’s tips.</p>
-          </div>
-        </div>
-        <Icon n="chev" className="chev" />
-      </button>}
 
       <h2>This week</h2>
       <div className="card">
@@ -99,7 +82,15 @@ export default function Home() {
           <p className="sub" style={{ marginTop: 6 }}>{s.msgs.filter(message => message.w === 'them').at(-1)?.t}</p>
         </> : <p className="sub">No feedback yet. Open Care team to send a question.</p>}
       </button>
-      <div className="alert">Your plan is chosen by your care team. BumpBridge does not diagnose or decide whether activity is safe for you.</div>
+      <div className="tip" style={{ marginTop: 16 }}>
+        <div className="row" style={{ gap: 8 }}>
+          <Icon n="bulb" className="tick" />
+          <span className="pill">Tip of the day</span>
+        </div>
+        <p style={{ marginTop: 6 }}><b>{tip.title}</b></p>
+        <p>{tip.body}</p>
+        <button type="button" className="more" onClick={() => setTipI((tipI + 1) % TIPS.length)}>Show another tip</button>
+      </div>
     </>
   )
 }

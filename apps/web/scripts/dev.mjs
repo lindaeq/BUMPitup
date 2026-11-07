@@ -10,7 +10,7 @@ const server = spawn(node, [path.join(root, 'server', 'index.mjs')], {
   env: process.env,
 })
 const viteCli = path.join(root, 'node_modules', 'vite', 'bin', 'vite.js')
-const web = spawn(node, [viteCli], {
+const web = spawn(node, [viteCli, '--host', '127.0.0.1'], {
   cwd: root,
   stdio: 'inherit',
   env: process.env,
