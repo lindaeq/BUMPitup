@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { addDoc, collection, doc, onSnapshot, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { db, PATIENT_ID, firebaseError } from './firebase.js';
 import { EXERCISES, exerciseById } from './exercises.js';
 import { displayTime, latestAssignments, usePatientCollection } from './usePatientCollection.js';
@@ -11,18 +11,62 @@ import { plannedFor, upcomingPlan } from '../lib/schedule';
 
 function CurrentSchedule() {
   const { items, status, error } = usePatientCollection('assignments');
-  const exercises = latestAssignments(items).map(item => ({
-    id: item.id,
-    name: exerciseById(item.exerciseId)?.name ?? item.exerciseId,
-  }));
-  const dates = upcomingPlan(exercises);
+  const current = latestAssignments(items);
+  const assigned = current.map(item => ({ exerciseId: item.exerciseId }));
+  const [draftDays, setDraftDays] = useState(null);
+  const [scheduleError, setScheduleError] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [busy, setBusy] = useState(false);
+  const dates = upcomingPlan(EXERCISES);
+  const fallbackDays = Array(7).fill('');
+  dates.forEach(date => { fallbackDays[date.getDay()] = plannedFor(date, assigned)[0]?.exerciseId ?? ''; });
+  const days = draftDays ?? fallbackDays;
+  useEffect(() => onSnapshot(doc(db, 'schedules', PATIENT_ID), snapshot => {
+    const saved = snapshot.data()?.days;
+    setDraftDays(Array.isArray(saved) && saved.length === 7 ? saved : null);
+    setScheduleError('');
+  }, failure => setScheduleError(failure?.code === 'permission-denied'
+    ? 'Publish the updated Firestore rules to edit this schedule.'
+    : firebaseError(failure))), []);
+  const chooseDay = (weekday, exerciseId) => {
+    const next = [...days];
+    next[weekday] = exerciseId;
+    setDraftDays(next);
+    setFeedback('');
+  };
+  const saveSchedule = async () => {
+    if (busy) return;
+    setBusy(true);
+    setFeedback('Saving…');
+    try {
+      const batch = writeBatch(db);
+      const missing = [...new Set(days.filter(Boolean))].filter(id => !current.some(item => item.exerciseId === id));
+      for (const id of missing) {
+        const exercise = exerciseById(id);
+        batch.set(doc(collection(db, 'assignments')), {
+          patientId: PATIENT_ID, exerciseId: id,
+          targetReps: exercise.defaultReps, targetDurationSeconds: exercise.defaultDurationSeconds,
+          instructions: '', createdAt: serverTimestamp(),
+        });
+      }
+      batch.set(doc(db, 'schedules', PATIENT_ID), { patientId: PATIENT_ID, days, updatedAt: serverTimestamp() });
+      await batch.commit();
+      setFeedback('Schedule saved.');
+    } catch (failure) { setFeedback(firebaseError(failure)); }
+    finally { setBusy(false); }
+  };
   return <section className="card provider-schedule">
-    <div className="provider-schedule-heading"><h3>Exercise schedule</h3><span>Next 7 days</span></div>
-    {status !== 'Live · connected to Firestore' && <p role="status">{status}</p>}{error && <p role="alert">{error}</p>}
-    {dates.length ? <div className="provider-schedule-days">{dates.map(date => <div key={date.toDateString()} className="provider-schedule-day">
-      <span>{date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-      <strong>{plannedFor(date, exercises).map(exercise => exercise.name).join(' · ')}</strong>
-    </div>)}</div> : <p>No exercises scheduled yet.</p>}
+    <div className="provider-schedule-heading"><div><h3>Weekly exercise schedule</h3><p>Choose an exercise for each day.</p></div><span>Repeats weekly</span></div>
+    {status !== 'Live · connected to Firestore' && <p role="status">{status}</p>}{error && <p role="alert">{error}</p>}{scheduleError && <p role="alert">{scheduleError}</p>}
+    <div className="provider-schedule-days">{dates.map(date => <div key={date.toDateString()} className="provider-schedule-day">
+      <div className="provider-schedule-date"><span className="provider-day-marker">{date.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2)}</span><div><strong>{date.toLocaleDateString('en-US', { weekday: 'long' })}</strong><small>{date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</small></div></div>
+      <select aria-label={`Exercise for ${date.toLocaleDateString('en-US', { weekday: 'long' })}`} value={days[date.getDay()]} onChange={event => chooseDay(date.getDay(), event.target.value)} disabled={busy}>
+        <option value="">Rest day</option>
+        {EXERCISES.map(exercise => <option key={exercise.id} value={exercise.id}>{exercise.name}{current.some(item => item.exerciseId === exercise.id) ? '' : ' · add to plan'}</option>)}
+      </select>
+    </div>)}</div>
+    <div className="provider-schedule-footer"><p>New exercises are added to the patient plan when saved.</p><button type="button" className="provider-save-schedule" disabled={busy || Boolean(scheduleError) || status !== 'Live · connected to Firestore'} onClick={saveSchedule}>Save schedule</button></div>
+    {feedback && <p role="status" aria-live="polite">{feedback}</p>}
   </section>;
 }
 
@@ -32,14 +76,14 @@ function AssignmentEditor() {
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [selected, setSelected] = useState(EXERCISES[0].id);
-  const [reps, setReps] = useState('10');
-  const [duration, setDuration] = useState('60');
+  const [reps, setReps] = useState(String(EXERCISES[0].defaultReps));
+  const [duration, setDuration] = useState(String(EXERCISES[0].defaultDurationSeconds));
   const [instructions, setInstructions] = useState('');
   function choose(id) {
     setSelected(id);
     const previous = current.find(item => item.exerciseId === id);
-    setReps(String(previous?.targetReps ?? 10));
-    setDuration(String(previous?.targetDurationSeconds ?? 60));
+    setReps(String(previous?.targetReps ?? exerciseById(id)?.defaultReps ?? 10));
+    setDuration(String(previous?.targetDurationSeconds ?? exerciseById(id)?.defaultDurationSeconds ?? 60));
     setInstructions(previous?.instructions ?? '');
   }
   async function assign(event) {

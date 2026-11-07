@@ -27,6 +27,10 @@ export type State = {
   view: View
   patientName: string
   pregnancyWeek: number | null
+  age: number | null
+  weightKg: number | null
+  dueDate: string | null
+  scheduleDays: string[] | null
   error: string | null
   arg: string | null
   tab: Tab
@@ -52,6 +56,7 @@ export type Ctx = {
   saveCheckin: () => Promise<void>
   sendMessage: (text: string) => Promise<void>
   saveSession: () => Promise<void>
+  saveProfile: (profile: { name: string; age: number; weightKg: number; dueDate: string }) => Promise<void>
 }
 
 export const AppCtx = createContext<Ctx | null>(null)
@@ -66,6 +71,10 @@ export const initialState: State = {
   view: 'home',
   patientName: 'Patient',
   pregnancyWeek: null,
+  age: null,
+  weightKg: null,
+  dueDate: null,
+  scheduleDays: null,
   error: null,
   arg: null,
   tab: 'home',
@@ -84,8 +93,8 @@ export const initialState: State = {
 
 export const exerciseTemplates: Exercise[] = [
     { id: 'sq', name: 'Wide-stance bodyweight squats', mode: 'cam', exerciseId: '', assignmentId: '', targetDurationSeconds: 60, reps: 10, sets: 2, done: false, rom: 'Knee angle', note: 'Keep your feet shoulder-width apart and use a chair for balance.', tips: ['Hold a chair or counter for balance.', 'Go only as deep as feels comfortable.', 'Breathe out as you stand up.'], steps: ['Stand tall facing the camera, 6 feet back.', 'Lower slowly as if sitting, keeping knees over toes.', 'Pause, then press through your heels to stand.', 'Stop if you feel pain or dizziness.'] },
-    { id: 'bd', name: 'Bird dog', mode: 'manual', exerciseId: '', assignmentId: '', targetDurationSeconds: 60, reps: 6, sets: 2, done: false, rom: 'Hip extension', note: 'Move slowly. Keep your back flat and hips level.', tips: ['Keep your hips level, like carrying a cup on your back.', 'Move slowly and stop before your back arches.', 'Place a folded towel under your knees.'], steps: ['Start on hands and knees, side-on to the camera.', 'Extend one arm and the opposite leg together.', 'Hold for two seconds, then return.', 'Repeat on the other side.'] },
-    { id: 'wp', name: 'Wall push-ups', mode: 'manual', exerciseId: '', assignmentId: '', targetDurationSeconds: 60, reps: 8, sets: 2, done: false, rom: 'Wrist motion', note: 'Keep the movement comfortable and follow your care team’s instructions.', tips: ['Stand an arm’s length from the wall.', 'Keep your body in one straight line.', 'Exhale as you push away from the wall.'], steps: ['Stand an arm’s length from a wall.', 'Bend your elbows to bring your chest toward the wall.', 'Push back slowly to the start.'] },
+    { id: 'bd', name: 'Bird dog', mode: 'cam', exerciseId: '', assignmentId: '', targetDurationSeconds: 60, reps: 6, sets: 2, done: false, rom: 'Hip extension', note: 'Move slowly. Keep your back flat and hips level.', tips: ['Keep your hips level, like carrying a cup on your back.', 'Move slowly and stop before your back arches.', 'Place a folded towel under your knees.'], steps: ['Start on hands and knees, side-on to the camera.', 'Extend one arm and the opposite leg together.', 'Hold for two seconds, then return.', 'Repeat on the other side.'] },
+    { id: 'wp', name: 'Wall push-ups', mode: 'cam', exerciseId: '', assignmentId: '', targetDurationSeconds: 60, reps: 8, sets: 2, done: false, rom: 'Wrist motion', note: 'Keep the movement comfortable and follow your care team’s instructions.', tips: ['Stand an arm’s length from the wall.', 'Keep your body in one straight line.', 'Exhale as you push away from the wall.'], steps: ['Stand an arm’s length from a wall.', 'Bend your elbows to bring your chest toward the wall.', 'Push back slowly to the start.'] },
     { id: 'ar', name: 'Seated arm raises', mode: 'cam', exerciseId: '', assignmentId: '', targetDurationSeconds: 60, reps: 10, sets: 2, done: false, rom: 'Shoulder angle', note: 'Let’s keep the arm raises gentle this week.', tips: ['Sit tall with your shoulders relaxed.', 'Stop at shoulder height. No need to go higher.', 'Breathe steadily and don’t hold your breath.'], steps: ['Sit upright on a firm chair facing the camera.', 'Raise both arms out to the sides to shoulder height.', 'Lower with control.', 'Breathe steadily throughout.'] },
   ]
 

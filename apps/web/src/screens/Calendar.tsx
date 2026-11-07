@@ -3,7 +3,7 @@ import { useApp, type State } from '../store'
 import { plannedFor } from '../lib/schedule'
 import { BarChart, LineChart } from '../components/Charts'
 import Icon from '../components/Icon'
-import { CURRENT_WEEK, DUE, EVENTS, RECS, START, TODAY, WEEKLY_GOAL, WEEKS, dayIndex, iso, streak, weekOf, type Rec } from '../data'
+import { CURRENT_WEEK, DUE, EVENTS, RECS, TODAY, WEEKLY_GOAL, WEEKS, addDays, dayIndex, iso, streak, type Rec } from '../data'
 
 const FAT = ['', 'Low', 'Moderate', 'High']
 const level = (m: number) => (m === 0 ? 0 : m < 15 ? 1 : m < 25 ? 2 : 3)
@@ -32,8 +32,16 @@ function HBar({ label, pct, right }: { label: string; pct: number; right: string
 
 export default function Calendar() {
   const { s } = useApp()
+  const dueDate = s.dueDate ? new Date(`${s.dueDate}T12:00:00`) : DUE
+  const pregnancyStart = addDays(dueDate, -280)
+  const pregnancyWeek = s.pregnancyWeek ?? CURRENT_WEEK
+  const firstMonth = new Date(pregnancyStart.getFullYear(), pregnancyStart.getMonth(), 1)
+  const monthCount = (dueDate.getFullYear() - firstMonth.getFullYear()) * 12 + dueDate.getMonth() - firstMonth.getMonth() + 1
+  const monthAt = (index: number) => new Date(firstMonth.getFullYear(), firstMonth.getMonth() + index, 1)
+  const weekFor = (date: Date) => Math.max(0, Math.floor((Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(pregnancyStart.getFullYear(), pregnancyStart.getMonth(), pregnancyStart.getDate())) / 604800000))
+  const initialMonth = Math.max(0, Math.min(monthCount - 1, (TODAY.getFullYear() - firstMonth.getFullYear()) * 12 + TODAY.getMonth() - firstMonth.getMonth()))
   const [mode, setMode] = useState<'month' | 'year' | 'trends'>('month')
-  const [mi, setMi] = useState(6)
+  const [mi, setMi] = useState(initialMonth)
   const [sel, setSel] = useState(iso(TODAY))
   const [range, setRange] = useState(12)
   const today = todayRec(s)
@@ -50,9 +58,9 @@ export default function Calendar() {
       const date = new Date(m.getFullYear(), m.getMonth(), d)
       const k = iso(date)
       const r = by.get(k)
-      const inPreg = dayIndex(date) >= 0 && date <= DUE
+      const inPreg = date >= pregnancyStart && date <= dueDate
       const lv = r ? level(r.mins) : 0
-      const planned = plannedFor(date, s.ex)
+      const planned = plannedFor(date, s.ex, s.scheduleDays)
       if (mini) out.push(<i key={k} className={`${inPreg ? `l${lv}` : 'off'}`} />)
       else
         out.push(
@@ -76,12 +84,12 @@ export default function Calendar() {
   )
 
   if (mode === 'month') {
-    const m = new Date(2026, 4 + mi, 1)
+    const m = monthAt(mi)
     const sd = parse(sel)
     const r = by.get(sel)
     const ev = EVENTS[sel]
-    const preg = dayIndex(sd) >= 0 && sd <= DUE
-    const planned = plannedFor(sd, s.ex)
+    const preg = sd >= pregnancyStart && sd <= dueDate
+    const planned = plannedFor(sd, s.ex, s.scheduleDays)
     return (
       <>
         <h1 style={{ marginTop: 10 }}>Calendar</h1>
@@ -89,7 +97,7 @@ export default function Calendar() {
         <div className="row sp" style={{ marginTop: 14 }}>
           <button type="button" className="ico" aria-label="Previous month" disabled={mi === 0} style={{ opacity: mi === 0 ? 0.35 : 1 }} onClick={() => setMi(mi - 1)}><Icon n="back" /></button>
           <b style={{ fontSize: 17 }}>{mname(m, s.language)}</b>
-          <button type="button" className="ico" aria-label="Next month" disabled={mi === 9} style={{ opacity: mi === 9 ? 0.35 : 1 }} onClick={() => setMi(mi + 1)}><Icon n="chev" /></button>
+          <button type="button" className="ico" aria-label="Next month" disabled={mi >= monthCount - 1} style={{ opacity: mi >= monthCount - 1 ? 0.35 : 1 }} onClick={() => setMi(mi + 1)}><Icon n="chev" /></button>
         </div>
         <div className="cal">
           {DOW.map((d, i) => <div key={i} className="wd">{d}</div>)}
@@ -103,7 +111,7 @@ export default function Calendar() {
         <div className="card">
           <div className="row sp">
             <b>{sd.toLocaleDateString(s.language, { weekday: 'long', month: 'long', day: 'numeric' })}</b>
-            {preg && <span className="pill">Week {weekOf(sd)}</span>}
+            {preg && <span className="pill">Week {weekFor(sd)}</span>}
           </div>
           {ev && <div className="alert" style={{ marginTop: 10, background: 'var(--blush)', color: 'var(--rosed)' }}><b>{ev}</b></div>}
           {planned.length > 0 && <div className="scheduled-detail"><b>Planned exercises</b>{planned.map(exercise => <p key={exercise.id}>{exercise.name}</p>)}</div>}
@@ -129,23 +137,23 @@ export default function Calendar() {
   }
 
   if (mode === 'year') {
-    const f1 = Math.min(1, CURRENT_WEEK / 13), f2 = Math.max(0, Math.min(1, (CURRENT_WEEK - 13) / 14)), f3 = Math.max(0, Math.min(1, (CURRENT_WEEK - 27) / 13))
-    const toGo = Math.round((DUE.getTime() - TODAY.getTime()) / 86400000)
-    const events = Object.entries(EVENTS).sort()
+    const f1 = Math.min(1, pregnancyWeek / 13), f2 = Math.max(0, Math.min(1, (pregnancyWeek - 13) / 14)), f3 = Math.max(0, Math.min(1, (pregnancyWeek - 27) / 13))
+    const toGo = Math.round((Date.UTC(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate()) - Date.UTC(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate())) / 86400000)
+    const events = [...Object.entries(EVENTS).filter(([key, title]) => title !== 'Estimated due date' && parse(key) >= pregnancyStart && parse(key) <= dueDate), [iso(dueDate), 'Estimated due date'] as [string, string]].sort()
     return (
       <>
         <h1 style={{ marginTop: 10 }}>Calendar</h1>
         {seg}
         <div className="card">
-          <div className="row sp"><b>Week {CURRENT_WEEK} of 40</b><span className="pill">{toGo} days to go</span></div>
-          <div className="bar" style={{ marginTop: 10 }}><i style={{ width: `${(CURRENT_WEEK / 40) * 100}%` }} /></div>
+          <div className="row sp"><b>Week {pregnancyWeek} of 40</b><span className="pill">{toGo} days to go</span></div>
+          <div className="bar" style={{ marginTop: 10 }}><i style={{ width: `${(pregnancyWeek / 40) * 100}%` }} /></div>
           <div className="tri">
             <i style={{ flex: 13 }}><u style={{ width: `${f1 * 100}%` }} /></i>
             <i style={{ flex: 14 }}><u style={{ width: `${f2 * 100}%` }} /></i>
             <i style={{ flex: 13 }}><u style={{ width: `${f3 * 100}%` }} /></i>
           </div>
           <div className="row sp sub" style={{ fontSize: 11, marginTop: 4 }}><span>Trimester 1</span><span>Trimester 2</span><span>Trimester 3</span></div>
-          <p className="sub" style={{ marginTop: 10, fontSize: 12 }}>Started {mname(START, s.language, false)} {START.getDate()}, 2026 · Estimated due date {mname(DUE, s.language, false)} {DUE.getDate()}, 2027</p>
+          <p className="sub" style={{ marginTop: 10, fontSize: 12 }}>Started {pregnancyStart.toLocaleDateString(s.language, { month: 'short', day: 'numeric', year: 'numeric' })} · Estimated due date {dueDate.toLocaleDateString(s.language, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
         </div>
         <div className="stats">
           <div className="stat"><b>{RECS.reduce((a, r) => a + r.mins, 0).toLocaleString()}</b><small>Active minutes</small></div>
@@ -155,8 +163,8 @@ export default function Calendar() {
         <h2>Your pregnancy, month by month</h2>
         <p className="sub">Tap a month to open it. Darker squares mean more active minutes.</p>
         <div className="months">
-          {Array.from({ length: 10 }, (_, i) => {
-            const m = new Date(2026, 4 + i, 1)
+          {Array.from({ length: monthCount }, (_, i) => {
+            const m = monthAt(i)
             return (
               <button key={i} type="button" className="mon" onClick={() => { setMi(i); setMode('month') }}>
                 <b>{mname(m, s.language, false)} {String(m.getFullYear()).slice(2)}</b>
@@ -170,8 +178,8 @@ export default function Calendar() {
           {events.map(([k, t]) => {
             const d = parse(k)
             return (
-              <button key={k} type="button" className="item" onClick={() => { setMi(d.getMonth() - 4 + (d.getFullYear() - 2026) * 12); setSel(k); setMode('month') }}>
-                <div><b>{t}</b><small>{d.toLocaleDateString(s.language, { weekday: 'short', month: 'short', day: 'numeric' })} · Week {weekOf(d)}</small></div>
+              <button key={k} type="button" className="item" onClick={() => { setMi((d.getFullYear() - firstMonth.getFullYear()) * 12 + d.getMonth() - firstMonth.getMonth()); setSel(k); setMode('month') }}>
+                <div><b>{t}</b><small>{d.toLocaleDateString(s.language, { weekday: 'short', month: 'short', day: 'numeric' })} · Week {weekFor(d)}</small></div>
                 <span className={`pill ${d <= TODAY ? 'ok' : ''}`} style={{ marginLeft: 'auto' }}>{d <= TODAY ? 'Done' : 'Upcoming'}</span>
               </button>
             )

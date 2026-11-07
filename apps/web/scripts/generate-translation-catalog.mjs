@@ -9,7 +9,7 @@ const files = [
   ...screens.map(name => path.join(root, 'screens', `${name}.tsx`)),
   ...['BackBar', 'PhoneFrame'].map(name => path.join(root, 'components', `${name}.tsx`)),
   path.join(root, 'tracking', 'vision', 'movementTips.ts'),
-  path.join(root, 'data.ts'), path.join(root, 'store.ts'),
+  path.join(root, 'data.ts'), path.join(root, 'store.ts'), path.join(root, 'lib', 'profile.ts'),
 ]
 
 const phrases = new Set()
@@ -33,6 +33,7 @@ for (const file of files) {
         add(node.text, file.endsWith('data.ts') && parent.name.getText(source) === 'name')
       }
       else if (ts.isCallExpression(parent) && ['t', 'showToast'].includes(parent.expression.getText(source))) add(node.text)
+      else if (ts.isNewExpression(parent) && parent.expression.getText(source) === 'Error') add(node.text)
     }
     ts.forEachChild(node, visit)
   }

@@ -10,8 +10,8 @@ const weeks = WEEKS.slice(-8).map(week => ({
   Minutes: week.mins,
 }));
 
-const axis = { fill: '#8b7d82', fontSize: 11 };
-const tooltip = { borderRadius: 12, borderColor: '#eadde2' };
+const axis = { fill: '#77696f', fontSize: 13 };
+const tooltip = { borderRadius: 12, borderColor: '#eadde2', fontSize: 14 };
 
 export default function PatientGraphs() {
   return <div className="provider-graphs">

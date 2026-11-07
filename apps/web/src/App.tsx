@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { addDoc, collection, doc, onSnapshot, query, serverTimestamp, where, type DocumentData } from 'firebase/firestore'
+import { addDoc, collection, doc, onSnapshot, query, serverTimestamp, updateDoc, where, type DocumentData } from 'firebase/firestore'
 import PhoneFrame from './components/PhoneFrame'
 import { AppCtx, exerciseTemplates, initialState, type Ctx, type Exercise, type Hist, type State } from './store'
 import { db, PATIENT_ID, configError, firebaseError } from './lib/firebase'
+import { pregnancyWeekFromDueDate } from './lib/profile'
 import PhysioDashboard from './physio/PhysioDashboard.jsx'
 import './physio/physio.css'
 import Home from './screens/Home'
@@ -71,8 +72,18 @@ export default function App() {
     const fail = (error: unknown) => setS(st => ({ ...st, error: firebaseError(error) }))
     const patient = onSnapshot(doc(database, 'patients', PATIENT_ID), snapshot => {
       if (!snapshot.exists()) { setS(st => ({ ...st, error: `Patient ${PATIENT_ID} was not found in Firestore.` })); return }
-      setS(st => ({ ...st, patientName: snapshot.data().name || 'Patient', pregnancyWeek: snapshot.data().pregnancyWeek ?? null }))
+      const patient = snapshot.data()
+      setS(st => ({ ...st,
+        patientName: patient.name || 'Patient', pregnancyWeek: patient.pregnancyWeek ?? null,
+        age: typeof patient.age === 'number' ? patient.age : null,
+        weightKg: typeof patient.weightKg === 'number' ? patient.weightKg : null,
+        dueDate: typeof patient.dueDate === 'string' ? patient.dueDate : null,
+      }))
     }, fail)
+    const schedule = onSnapshot(doc(database, 'schedules', PATIENT_ID), snapshot => {
+      const days = snapshot.data()?.days
+      setS(st => ({ ...st, scheduleDays: Array.isArray(days) && days.length === 7 ? days : null }))
+    }, () => setS(st => ({ ...st, scheduleDays: null })))
     const listen = (name: string, onData: (items: RecordWithId[]) => void) => onSnapshot(
       query(collection(database, name), where('patientId', '==', PATIENT_ID)),
       snapshot => onData(snapshot.docs.map(item => ({ ...item.data(), id: item.id }) as RecordWithId).sort((a, b) => millis(b.createdAt) - millis(a.createdAt))), fail)
@@ -98,7 +109,7 @@ export default function App() {
         sym: [], notes: String(latest.notes || ''),
       } }) : ({ ...st, checked: false }))
     })
-    return () => { patient(); assignments(); sessions(); messages(); checkins() }
+    return () => { patient(); schedule(); assignments(); sessions(); messages(); checkins() }
   }, [isPhysio])
 
   const saveCheckin = useCallback(async () => {
@@ -130,7 +141,17 @@ export default function App() {
     })
   }, [s.sess, s.rp])
 
-  const ctx = useMemo<Ctx>(() => ({ s, set, go, showToast, saveCheckin, sendMessage, saveSession }), [s, set, go, showToast, saveCheckin, sendMessage, saveSession])
+  const saveProfile = useCallback<Ctx['saveProfile']>(async profile => {
+    if (!db) throw new Error(configError)
+    const name = profile.name.trim()
+    if (!name || name.length > 120) throw new Error('Enter a name under 120 characters.')
+    if (!Number.isInteger(profile.age) || profile.age < 1 || profile.age > 120) throw new Error('Enter an age from 1 to 120.')
+    if (!Number.isFinite(profile.weightKg) || profile.weightKg < 20 || profile.weightKg > 300) throw new Error('Enter a weight from 20 to 300 kg.')
+    const pregnancyWeek = pregnancyWeekFromDueDate(profile.dueDate)
+    await updateDoc(doc(db, 'patients', PATIENT_ID), { name, age: profile.age, weightKg: profile.weightKg, dueDate: profile.dueDate, pregnancyWeek })
+  }, [])
+
+  const ctx = useMemo<Ctx>(() => ({ s, set, go, showToast, saveCheckin, sendMessage, saveSession, saveProfile }), [s, set, go, showToast, saveCheckin, sendMessage, saveSession, saveProfile])
   if (isPhysio) return <div className="provider-root">
     <header><h1>BumpBridge</h1><p>Pregnancy check-ins & exercise tracking</p></header>
     <nav aria-label="Dashboards"><a href="/">Patient</a><a href="/?view=physio" aria-current="page">Physiotherapist</a></nav>
@@ -139,7 +160,7 @@ export default function App() {
   const screens = {
     home: <Home />, checkin: <CheckIn />, cidone: <CheckInDone />,
     plan: <Plan />, detail: <ExerciseDetail />, session: <Session key={s.arg} />,
-    report: <Report />, calendar: <Calendar />, baby: <Baby />, care: <Care />, you: <You />,
+    report: <Report />, calendar: <Calendar key={s.dueDate ?? 'default'} />, baby: <Baby />, care: <Care />, you: <You />,
   }
   return <AppCtx.Provider value={ctx}><PhoneFrame>
     {(configError || s.error) && <div className="alert red" role="alert">{configError || s.error}</div>}

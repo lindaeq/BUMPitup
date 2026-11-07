@@ -94,3 +94,5 @@ textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12
 .fcenter{display:flex;justify-content:center;margin:2px 0 4px}.fcenter svg{display:block}
 .field{display:block;width:100%;margin-top:8px;border:1.5px solid var(--line);border-radius:12px;padding:12px;font:inherit;font-size:15px;background:var(--card);color:var(--ink)}
 .field:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+.profile-form label{display:block;margin-bottom:12px;font-size:13px;font-weight:600}
+.profile-form .btn.ghost{margin-top:8px}
