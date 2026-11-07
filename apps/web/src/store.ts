@@ -61,7 +61,7 @@ export function useApp(): Ctx {
 
 export const initialState: State = {
   view: 'home',
-  patientName: 'Demo patient',
+  patientName: 'Patient',
   pregnancyWeek: null,
   error: null,
   arg: null,

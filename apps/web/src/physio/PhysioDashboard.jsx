@@ -7,6 +7,24 @@ import PatientDetails from './PatientDetails.jsx';
 import Messages from './Messages.jsx';
 import PatientGraphs from './PatientGraphs.jsx';
 import AISummary from './AISummary.jsx';
+import { plannedFor, upcomingPlan } from '../lib/schedule';
+
+function CurrentSchedule() {
+  const { items, status, error } = usePatientCollection('assignments');
+  const exercises = latestAssignments(items).map(item => ({
+    id: item.id,
+    name: exerciseById(item.exerciseId)?.name ?? item.exerciseId,
+  }));
+  const dates = upcomingPlan(exercises);
+  return <section className="card provider-schedule">
+    <div className="provider-schedule-heading"><h3>Exercise schedule</h3><span>Mon · Wed · Fri</span></div>
+    {status !== 'Live · connected to Firestore' && <p role="status">{status}</p>}{error && <p role="alert">{error}</p>}
+    {dates.length ? <div className="provider-schedule-days">{dates.map(date => <div key={date.toDateString()} className="provider-schedule-day">
+      <span>{date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+      <strong>{plannedFor(date, exercises).map(exercise => exercise.name).join(' · ')}</strong>
+    </div>)}</div> : <p>No exercises scheduled yet.</p>}
+  </section>;
+}
 
 function AssignmentEditor() {
   const { items, status, error } = usePatientCollection('assignments');
@@ -62,7 +80,7 @@ function Feed({ kind }) {
       <small>{displayTime(item.createdAt)}</small>
       {kind === 'checkins' ? <>
         <p><strong>Pain {item.painLevel}/10</strong> · Fatigue {item.fatigue}/10</p>
-        <p>{item.discomfortLocation}</p>{item.notes && <p className="notes">{item.notes}</p>}
+        <p>{item.discomfortLocation}</p>{item.notes && item.notes.trim() !== 'None — fictional demo test' && <p className="notes">{item.notes}</p>}
       </> : <>
         <h4>{exerciseById(item.exerciseId)?.name ?? (item.exercise === 'bomba' ? 'Exercise session' : item.exercise) ?? 'Exercise session'}</h4>
         <p>{item.repsCompleted ?? item.reps} reps · {item.durationSeconds}s · Pain {item.painLevel}/10</p>
@@ -77,6 +95,7 @@ export default function PhysioDashboard() {
   return <main className="provider-dashboard">
     <div className="provider-heading"><h2>Physiotherapist dashboard</h2></div>
     <div className="provider-overview"><PatientDetails /><AISummary /></div>
+    <CurrentSchedule />
     <PatientGraphs />
     <div className="columns"><div><AssignmentEditor /><Messages sender="provider" /></div><div><Feed kind="checkins" /><Feed kind="sessions" /></div></div>
   </main>;

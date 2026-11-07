@@ -31,7 +31,7 @@ export default function Home() {
         </div>
       </div>
       <div className="row" style={{ marginTop: 2 }}>
-        <span className="pill">{s.pregnancyWeek == null ? `Demo week ${CURRENT_WEEK}` : `Week ${s.pregnancyWeek}`}</span>
+        <span className="pill">Week {s.pregnancyWeek ?? CURRENT_WEEK}</span>
         {s.pregnancyWeek != null && <span className="pill">{s.pregnancyWeek < 13 ? 'First' : s.pregnancyWeek < 28 ? 'Second' : 'Third'} trimester</span>}
       </div>
 
@@ -55,7 +55,6 @@ export default function Home() {
       <div className="card">
         <div className="row sp"><b>{mins} of {WEEKLY_GOAL} active minutes</b><span className={`pill ${mins >= WEEKLY_GOAL ? 'ok' : ''}`}>{mins >= WEEKLY_GOAL ? 'Goal met' : `${WEEKLY_GOAL - mins} to go`}</span></div>
         <div className="bar" style={{ marginTop: 10 }}><i style={{ width: `${Math.min(100, (mins / WEEKLY_GOAL) * 100)}%` }} /></div>
-        <p className="sub" style={{ marginTop: 8, fontSize: 12 }}>Demo weekly goal. Your recorded sessions appear in the exercise history.</p>
       </div>
 
       <h2>Today’s exercise plan</h2>

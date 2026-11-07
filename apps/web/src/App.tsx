@@ -70,7 +70,7 @@ export default function App() {
     const fail = (error: unknown) => setS(st => ({ ...st, error: firebaseError(error) }))
     const patient = onSnapshot(doc(database, 'patients', PATIENT_ID), snapshot => {
       if (!snapshot.exists()) { setS(st => ({ ...st, error: `Patient ${PATIENT_ID} was not found in Firestore.` })); return }
-      setS(st => ({ ...st, patientName: snapshot.data().name || 'Demo patient', pregnancyWeek: snapshot.data().pregnancyWeek ?? null }))
+      setS(st => ({ ...st, patientName: snapshot.data().name || 'Patient', pregnancyWeek: snapshot.data().pregnancyWeek ?? null }))
     }, fail)
     const listen = (name: string, onData: (items: RecordWithId[]) => void) => onSnapshot(
       query(collection(database, name), where('patientId', '==', PATIENT_ID)),

@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { useApp, type Exercise, type State } from '../store'
+import { useApp, type State } from '../store'
+import { plannedFor, upcomingPlan } from '../lib/schedule'
 import { BarChart, LineChart } from '../components/Charts'
 import Icon from '../components/Icon'
-import { CURRENT_WEEK, DUE, EVENTS, RECS, START, TODAY, WEEKLY_GOAL, WEEKS, addDays, dayIndex, iso, streak, weekOf, type Rec } from '../data'
+import { CURRENT_WEEK, DUE, EVENTS, RECS, START, TODAY, WEEKLY_GOAL, WEEKS, dayIndex, iso, streak, weekOf, type Rec } from '../data'
 
 const FAT = ['', 'Low', 'Moderate', 'High']
 const level = (m: number) => (m === 0 ? 0 : m < 15 ? 1 : m < 25 ? 2 : 3)
@@ -13,13 +14,6 @@ const parse = (k: string) => {
   return new Date(y, m - 1, d)
 }
 const avg = (a: number[]) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0)
-const plannedFor = (date: Date, exercises: Exercise[]) => {
-  if (date < TODAY || !exercises.length) return []
-  if (date.getDay() === 1) return exercises.slice(0, 1)
-  if (date.getDay() === 3) return [exercises[1] ?? exercises[0]]
-  if (date.getDay() === 5) return exercises
-  return []
-}
 
 function todayRec(s: State): Rec {
   const done = s.ex.filter((e) => e.done)
@@ -88,15 +82,13 @@ export default function Calendar() {
     const ev = EVENTS[sel]
     const preg = dayIndex(sd) >= 0 && sd <= DUE
     const planned = plannedFor(sd, s.ex)
-    const upcoming = Array.from({ length: 8 }, (_, index) => addDays(TODAY, index)).filter(date => plannedFor(date, s.ex).length > 0).slice(0, 3)
+    const upcoming = upcomingPlan(s.ex)
     return (
       <>
         <h1 style={{ marginTop: 10 }}>Calendar</h1>
-      <div className="alert">The charts below use illustrative sample history. Your actual Firestore sessions appear under Recent sessions.</div>
         {seg}
         <div className="card sample-schedule">
-          <div className="row sp"><b>Sample exercise schedule</b><span className="pill">Mon · Wed · Fri</span></div>
-          <p className="sub">Example timing for your assigned exercises. Your physiotherapist has not set these dates.</p>
+          <div className="row sp"><b>Exercise schedule</b><span className="pill">Mon · Wed · Fri</span></div>
           {upcoming.length ? upcoming.map(date => <button key={iso(date)} type="button" className="schedule-row" onClick={() => { setSel(iso(date)); setMi(date.getMonth() - 4 + (date.getFullYear() - 2026) * 12) }}>
             <span>{date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
             <b>{plannedFor(date, s.ex).map(exercise => exercise.name).join(' · ')}</b>
@@ -151,7 +143,6 @@ export default function Calendar() {
     return (
       <>
         <h1 style={{ marginTop: 10 }}>Calendar</h1>
-      <div className="alert">The charts below use illustrative sample history. Your actual Firestore sessions appear under Recent sessions.</div>
         {seg}
         <div className="card">
           <div className="row sp"><b>Week {CURRENT_WEEK} of 40</b><span className="pill">{toGo} days to go</span></div>
@@ -214,7 +205,6 @@ export default function Calendar() {
   return (
     <>
       <h1 style={{ marginTop: 10 }}>Calendar</h1>
-      <div className="alert">The charts below use illustrative sample history. Your actual Firestore sessions appear under Recent sessions.</div>
       {seg}
       <div className="row" style={{ marginTop: 14 }}>
         {[4, 12, 24].map((n) => <button key={n} type="button" className={`chip ${range === n ? 'on' : ''}`} style={{ margin: 0 }} onClick={() => setRange(n)}>{n === 24 ? 'All time' : `Last ${n} weeks`}</button>)}
@@ -251,7 +241,6 @@ export default function Calendar() {
           </div>
         ))}
       </div>
-      <p className="sub" style={{ fontSize: 12, marginTop: 10 }}>Demo data for Selina from {mname(addDays(START, 0), false)} 2026 to today.</p>
     </>
   )
 }

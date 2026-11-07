@@ -28,7 +28,6 @@ export default function Plan() {
           {e.done ? <span className="pill ok">Done</span> : <Icon n="chev" className="chev" />}
         </button>
       ))}
-      <button type="button" className="chip" style={{ marginTop: 16 }} onClick={() => go('calendar', null, 'calendar')}>See sample schedule in Calendar →</button>
       <h2>Other exercise ideas</h2>
       <p className="sub">General examples to discuss with your physiotherapist. These are not part of your assigned plan and do not have tracking.</p>
       {IDEAS.map(idea => <div key={idea.name} className="card row exercise-idea">
