@@ -73,9 +73,7 @@ export const initialState: State = {
     { n: 'Bodyweight squats', d: 'Tue, Nov 3', r: 20, rom: 71, p: 4, df: 'Moderate' },
   ],
   msgs: [
-    { w: 'them', t: 'Hi Selina, I’ve set up your plan for this week. Let me know how the squats feel.', tm: 'Mon 10:12' },
-    { w: 'me', t: 'Thanks! Some lower back tightness after the bird dog.', tm: 'Wed 18:40' },
-    { w: 'them', t: 'Thanks for the update. Let’s keep the arm raises gentle this week and move slowly through bird dog. I’ll review your check-ins on Monday.', tm: 'Fri 09:05' },
+    { w: 'them', t: 'Hi Selina! I’m the BumpBridge AI assistant. I can help with general pregnancy and wellness education. I’m not a clinician, and this chat does not send messages to your care team.', tm: 'Now' },
   ],
 }
 
