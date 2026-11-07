@@ -21,9 +21,9 @@ export default function Messages({ sender }) {
     } catch (failure) { setFeedback(firebaseError(failure)); }
     finally { setBusy(false); }
   }
-  return <section className="card"><h3>Messages & feedback</h3>
-    <p role="status">{status}</p>{error && <p role="alert">{error}</p>}
-    <form onSubmit={send}><fieldset disabled={busy}><label>{sender === 'provider' ? 'Feedback or plan guidance' : 'Question or adjustment request'}
+  return <section className="card"><h3>Messages</h3>
+    {status !== 'Live · connected to Firestore' && <p role="status">{status}</p>}{error && <p role="alert">{error}</p>}
+    <form onSubmit={send}><fieldset disabled={busy}><label>{sender === 'provider' ? 'Message to patient' : 'Message to care team'}
       <textarea name="text" rows={3} maxLength={2000} required /></label>
       <button type="submit">Send message</button></fieldset><p role="status" aria-live="polite">{feedback}</p></form>
     {!items.length && !error && <p>No messages yet.</p>}

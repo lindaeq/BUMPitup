@@ -40,11 +40,11 @@ export default function AISummary() {
   }
 
   return <section className="card provider-ai-summary">
-    <div className="provider-summary-heading"><h3>AI Patient Insights</h3>
-      <button type="button" disabled={loading || (!sessions.length && !checkins.length)} onClick={generateSummary}>{loading ? 'Analyzing…' : summary ? 'Refresh AI' : 'Generate summary'}</button>
+    <div className="provider-summary-heading"><h3>AI summary</h3>
+      <button type="button" disabled={loading || (!sessions.length && !checkins.length)} onClick={generateSummary}>{loading ? 'Summarizing…' : summary ? 'Refresh' : 'Summarize'}</button>
     </div>
     {error && <p role="alert">{error}</p>}
-    <p role="status">{loading ? 'Analyzing recent check-ins and exercise sessions…' : summary || 'Generate a short summary of the latest activity.'}</p>
-    <small>AI-generated draft from the five most recent logs. Review against the original entries before using it.</small>
+    <p role="status">{loading ? 'Summarizing recent activity…' : summary || 'A quick overview of recent activity.'}</p>
+    {summary && <small>Review against the original entries.</small>}
   </section>;
 }

@@ -133,7 +133,6 @@ export default function App() {
   if (isPhysio) return <div className="provider-root">
     <header><h1>BumpBridge</h1><p>Pregnancy check-ins & exercise tracking</p></header>
     <nav aria-label="Dashboards"><a href="/">Patient</a><a href="/?view=physio" aria-current="page">Physiotherapist</a></nav>
-    <p className="provider-notice">Hackathon demo · fictional data only · no authentication or private access</p>
     {configError ? <p role="alert">{configError}</p> : <PhysioDashboard />}
   </div>
   const screens = {
