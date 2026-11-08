@@ -1,47 +1,75 @@
-# BUMPitup
+# BumpBridge
 
-Hackathon patient and physiotherapist demo in one React app. The patient screens come from the Linda frontend on `main`, the camera tracker from `cv`, and the Firebase assignment and communication flow from `Jenny`. Use fictional data only.
+BumpBridge connects a pregnancy exercise app with a physiotherapist dashboard. A patient can follow a weekly plan, complete exercises with camera-guided movement tracking, submit daily check-ins, and message their care team. The physiotherapist can update the plan and see new activity as it arrives.
 
-## Run
+## Tech stack
+
+| Part | Technology | What it does |
+| --- | --- | --- |
+| Patient and physio UI | React, TypeScript/JavaScript, Vite, Tailwind CSS and custom CSS | Runs both views in one web app. |
+| Shared data | Firebase Cloud Firestore | Stores the patient profile, weekly schedule, assignments, check-ins, sessions and care-team messages. `onSnapshot()` keeps both views in sync. |
+| Exercise tracking | MediaPipe Pose | Estimates movement from the camera in the browser. All four exercises have tracking configurations; manual entry is the fallback. Video is not uploaded. |
+| Heart rate | Arduino + Web Serial | Reads the wristband during a squat session in a compatible browser. |
+| Charts | Recharts | Shows trends on the physio dashboard. |
+| AI features | Small local Node.js API + OpenAI or Gemini | Serves Ask AI and the on-demand physio summary. OpenAI also translates the patient interface when a language is selected. API keys stay outside the browser bundle. |
+
+## Run locally
+
+From the repository root:
 
 ```sh
 cd apps/web
 npm install
 cp .env.example .env.local
-# Fill in the Firebase web app values in .env.local
+```
+
+Fill in the six `VITE_FIREBASE_*` fields in `apps/web/.env.local`. Find them in **Firebase Console → Project settings → General → Your apps → Web app → Config**. These are Firebase web app identifiers, not a substitute for Firestore security rules.
+
+To enable AI, create the ignored file `apps/web/.env` with one provider key:
+
+```dotenv
+OPENAI_API_KEY=your_key_here
+# or GEMINI_API_KEY=your_key_here
+```
+
+OpenAI is required for interface translation. If both keys are present, Ask AI uses OpenAI and the physio summary uses Gemini. Do not put a secret key in a `VITE_` variable. AI requests are made only when the relevant feature is used.
+
+Start the web app and local AI API together:
+
+```sh
 npm run dev
 ```
 
-Open the URL Vite prints. The patient app is at `/`; the existing physiotherapist view is at `/?view=physio`. Open them in separate tabs to see live updates. `npm run build`, `npm run lint`, and `npm run test` are the verification commands.
+Open the URL Vite prints. The **patient view** is at `/` and the **physiotherapist view** is at `/?view=physio`. Open both to watch Firestore updates appear without refreshing. Restart the server after changing either environment file. The AI API runs on port 3001; a static web deployment also needs an API host for AI features.
 
-The local integration checkout already has an ignored `apps/web/.env.local` copied from the prior Jenny checkout. On another machine, obtain the six `VITE_FIREBASE_*` values from Firebase Console → Project settings → General → Your apps → Web app → Config. These are public browser config values, not Firestore security credentials. Restart Vite after changing the environment.
+### Show the physio view on another device
 
-For AI chat and the physiotherapist's AI summary, put your **OpenAI or Gemini API key** in the ignored `apps/web/.env` file as `OPENAI_API_KEY=...` or `GEMINI_API_KEY=...`, then restart `npm run dev`. One provider key runs both features. With both keys, the chat uses OpenAI and the summary uses Gemini. The key stays in the local API server, not the Vite browser bundle. The `npm run dev` command now starts both the API on port 3001 and Vite; a static deployment needs an equivalent API host. The AI assistant is separate from the Firestore Care team conversation and does not message a clinician. Summaries are generated on demand from five recent fictional logs and require clinician review.
+Keep `npm run dev` running. In a second terminal in `apps/web`, run:
+
+```sh
+npm run dev:web -- --host 0.0.0.0 --port 5174
+```
+
+On a device connected to the same network, open `http://<your-laptop-IP>:5174/?view=physio`. On a Mac, `ipconfig getifaddr en0` usually prints the Wi-Fi IP. Some campus networks block connections between devices; a personal hotspot is an alternative. Keep the patient camera view on `localhost`, which browsers treat as a secure context.
 
 ## Firebase demo setup
 
-In the **default Cloud Firestore database**, create or confirm `patients/demo-patient-01` with a fictional `name` string and a numeric `pregnancyWeek`. The patient can edit name, age, weight, and due date from You → Profile; those fields save to this document. Assignments, check-ins, sessions, messages, and the weekly schedule use the same patient ID.
+Use the default Cloud Firestore database. Create `patients/demo-patient-01` with at least a `name` string and numeric `pregnancyWeek`. The patient profile editor can then save name, age, weight and due date. All other records use the same patient ID.
 
-The checked-in [demo rules](firestore.demo.rules) need to be published separately: Firebase Console → Firestore Database → Rules → paste the file → **Publish**. Publish the updated file for profile editing and `schedules/demo-patient-01` to work, then refresh both tabs. The rules expire **November 9, 2026 at 00:00 UTC**. No authentication distinguishes a patient from a provider; the URL switch is only a view switch. Use a dedicated demo project, never real patient data, and replace these rules with restrictive rules immediately after the demo. The repository does not deploy rules automatically.
+Publish [firestore.demo.rules](firestore.demo.rules) through **Firebase Console → Firestore Database → Rules → paste the file → Publish**. The repository does not publish rules for you. These rules expire **November 9, 2026 at 00:00 UTC**; update the expiry if your demo is later.
 
-## Connected demo flow
+The rules allow unauthenticated access to the demo patient, and `?view=physio` is only a view switch. Use this setup only with demonstration data. Real patient data needs authentication, provider roles and restrictive rules.
 
-1. The physiotherapist assigns or adjusts one of four exercises with repetition and duration targets and optional instructions. The newest assignment for each exercise is the patient's current plan. In Weekly exercise schedule, choose an exercise or rest for each day and save; this repeats weekly and updates the patient calendar and today's home plan live.
-2. The patient receives the plan live, sees provider instructions, and starts an assigned exercise.
-3. All four exercises have MediaPipe tracking configurations in the browser. The tracker asks for camera permission and loads the pose model/WASM from external URLs. Video stays on the device and is not uploaded. If the camera or tracking fails, the patient can enter repetitions manually.
-4. On completion, the patient reports pain and difficulty. One summary goes to `sessions`, linked to the exact assignment. Only actual measured movement range is saved; heart rate remains `null` until real sensor integration exists.
-5. The provider sees the session and daily check-ins live. Patient questions and provider feedback appear in both views through `messages`.
+## Demo walkthrough
 
-The patient Calendar's older charts still use illustrative history; the Recent sessions list comes from Firestore. The home plan, care-team messages, weekly active minutes, check-in status, and session results use Firestore data. The squat session can show live heart rate from a connected Arduino wristband. CV angles are 2D estimates, not a clinical safety assessment.
+1. In the physio view, assign an exercise and save a seven-day repeating schedule. The patient home and calendar update live.
+2. In the patient view, complete a check-in or an assigned exercise. The physio view receives the entry live. Camera tracking supports squats, bird-dog, wall push-ups and seated arm raises; manual entry remains available.
+3. Connect the Arduino wristband in Chrome or Edge during squats to show live heart rate. Close the Arduino IDE Serial Monitor before connecting the browser to the port.
+4. Send a care-team message from either view. Generate the physio AI summary after entries exist; it appears as three short points.
+5. Edit the patient profile in **You → Profile** or choose a language in **You → Language**. Translation is requested only when a different language is selected and is cached in that browser.
 
-## Quick checks
+Some historical chart values are illustrative; live check-ins, sessions, messages, assignments and the schedule come from Firestore. Camera angles are two-dimensional estimates, not clinical measurements.
 
-- Assign seated arm raises in the provider tab. Confirm the patient plan and instructions update without refreshing.
-- Save a weekly schedule in the provider tab. Confirm the patient's calendar and today's plan update without refreshing.
-- Edit the patient profile in You. Confirm the provider's patient card and the pregnancy week update.
-- Submit a daily check-in from the patient tab. Confirm it appears in the provider tab.
-- Complete an assigned exercise, report pain and difficulty, and confirm the session appears with a tracking mode and optional estimated range.
-- Send a message each way. Confirm it appears in the other tab.
-- Open Ask AI and ask an educational question. Generate the AI summary in the physiotherapist tab after check-ins or sessions exist. These require an AI API key in `apps/web/.env`.
+## Checks
 
-If a write is denied, check the published rules and expiry. If the camera does not start, check browser permission and access to the MediaPipe model files. The manual fallback should still be available.
+From `apps/web`, run `npm run test`, `npm run lint` and `npm run build`. If a Firestore write is denied, check that the current demo rules are published and have not expired. If camera tracking cannot start, check browser permissions and access to the MediaPipe model files.
